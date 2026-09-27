@@ -1,0 +1,10 @@
+services:
+  market:
+    container_name: market
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: market
+    restart: on-failure
+    ports:
+      - "8080:8080"
