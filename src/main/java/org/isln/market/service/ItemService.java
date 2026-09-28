@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.isln.market.controller.request.ItemRequestParameters;
 import org.isln.market.dto.SortType;
+import org.isln.market.exception.ObjectNotFoundException;
 import org.isln.market.model.Item;
 import org.isln.market.repository.ItemRepository;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,10 @@ public class ItemService {
         String search = parameters.getSearch();
         PageRequest pageRequest = PageRequest.of(parameters.getPageNumber() - 1, parameters.getPageSize(), sort);
         return search == null ? find(pageRequest) : find(pageRequest, search);
+    }
+
+    public Item findById(Long id) {
+        return itemRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Товар не найден!"));
     }
 
     private Page<Item> find(PageRequest pageRequest) {

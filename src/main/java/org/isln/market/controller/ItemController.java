@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Controller
 @RequiredArgsConstructor
@@ -39,5 +40,12 @@ public class ItemController {
                 )
         );
         return "items";
+    }
+
+    @GetMapping({"/items/{id}"})
+    public String findItem(@PathVariable Long id, Model model) {
+        Item item = itemService.findById(id);
+        model.addAttribute("item", item);
+        return "item";
     }
 }
