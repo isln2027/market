@@ -5,6 +5,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 import org.isln.market.controller.request.ItemRequestParameters;
+import org.isln.market.dto.CartAction;
 import org.isln.market.dto.SortType;
 import org.isln.market.exception.ObjectNotFoundException;
 import org.isln.market.model.Item;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +40,18 @@ public class ItemService {
 
     public Item findById(Long id) {
         return itemRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Товар не найден!"));
+    }
+
+    @Transactional
+    public void performAction(Long id, CartAction action) {
+        Item item = findById(id);
+        if (action == CartAction.PLUS) {
+            item.addToCart();
+        } else if (action == CartAction.MINUS) {
+            item.removeFromCart();
+        } else {
+            throw new RuntimeException("Unknown action '" + action + "'");
+        }
     }
 
     private Page<Item> find(PageRequest pageRequest) {

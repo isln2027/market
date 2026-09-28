@@ -23,7 +23,17 @@ public class Item {
     private String description;
     private String imgPath;
     private Long price;
-    private Integer count;
+    private Integer count = 0;
+
+    public void addToCart() {
+        this.setCount(count + 1);
+    }
+
+    public void removeFromCart() {
+        if (count > 0) {
+            count--;
+        }
+    }
 
     public Long id() {
         return id;
