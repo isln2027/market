@@ -1,6 +1,6 @@
 package org.isln.market.dto;
 
-public enum Sort {
+public enum SortType {
     NO,
     ALPHA,
     PRICE

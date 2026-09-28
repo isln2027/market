@@ -1,12 +1,16 @@
 package org.isln.market.service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.isln.market.model.Item;
 
 public class ItemModelAdapter {
     public static List<List<Item>> putItemsInRows(List<Item> items, int itemsInRow) {
+        if (items == null || items.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<List<Item>> rows = new ArrayList<>();
         int i = 0;
         for (var item : items) {

@@ -4,15 +4,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
-import org.isln.market.dto.Sort;
-import org.isln.market.repository.ItemRepository;
+import org.isln.market.dto.SortType;
 
 @Getter
 @Setter
 @Accessors(chain = true)
 public class ItemRequestParameters {
     private String search;
-    private Sort sort = Sort.NO;
+    private SortType sort = SortType.NO;
     private Integer pageNumber = 1;
     private Integer pageSize = 5;
 }
