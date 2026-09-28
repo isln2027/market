@@ -19,7 +19,6 @@ public class AdminService {
 
     @EventListener
     public void populate(ApplicationStartedEvent event) {
-        System.out.println("Starting database population");
         if (itemRepository.count() == 0) {
             // todo add images
             List<Item> items = List.of(
@@ -35,9 +34,6 @@ public class AdminService {
                     new Item().setTitle("Ilford Pan 400").setDescription("Фотопленка 135").setPrice(1300L)
             );
             itemRepository.saveAll(items);
-            System.out.println("Items added");
-        } else {
-            System.out.println("Items already present");
         }
     }
 }
