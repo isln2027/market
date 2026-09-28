@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+
 @Getter
 @Setter
 @Accessors(chain = true)
@@ -23,4 +24,30 @@ public class Item {
     private String imgPath;
     private Long price;
     private Integer count;
+
+    public Long id() {
+        return id;
+    }
+
+    public String title() {
+        return title;
+    }
+
+    public String description() {
+        return description;
+    }
+
+    public String imgPath() {
+        return imgPath;
+    }
+
+    public Long price() {
+        return price;
+    }
+
+    public Integer count() {
+        return count;
+    }
 }
+
+
