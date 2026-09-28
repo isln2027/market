@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.isln.market.controller.request.CartActionRequest;
 import org.isln.market.controller.request.ItemRequestParameters;
+import org.isln.market.dto.CartAction;
 import org.isln.market.dto.Paging;
 import org.isln.market.model.Item;
 import org.isln.market.service.ItemModelAdapter;
@@ -15,8 +16,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -41,8 +44,15 @@ public class ItemController {
         return "item";
     }
 
+    @PostMapping({"/items/{id}"})
+    public String performCartAction(@PathVariable Long id, @RequestParam CartAction action, Model model) {
+        Item item = itemService.performAction(id, action);
+        model.addAttribute("item", item);
+        return "item";
+    }
+
     @PostMapping({"/items"})
-    public String addToCart(CartActionRequest parameters, RedirectAttributes attributes) {
+    public String performCartAction(CartActionRequest parameters, RedirectAttributes attributes) {
         itemService.performAction(parameters.getId(), parameters.getAction());
         attributes.addAttribute("sort", parameters.getSort().name());
         attributes.addAttribute("search", parameters.getSearch());

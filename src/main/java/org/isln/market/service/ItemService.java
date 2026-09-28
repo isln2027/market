@@ -43,7 +43,7 @@ public class ItemService {
     }
 
     @Transactional
-    public void performAction(Long id, CartAction action) {
+    public Item performAction(Long id, CartAction action) {
         Item item = findById(id);
         if (action == CartAction.PLUS) {
             item.addToCart();
@@ -52,6 +52,7 @@ public class ItemService {
         } else {
             throw new RuntimeException("Unknown action '" + action + "'");
         }
+        return item;
     }
 
     private Page<Item> find(PageRequest pageRequest) {
