@@ -10,6 +10,14 @@ services:
       - "8080:8080"
     depends_on:
       - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: market
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      SPRING_PROFILES_ACTIVE: production
+
   db:
     container_name: postgres
     image: postgres:17.5
