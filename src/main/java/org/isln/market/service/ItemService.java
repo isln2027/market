@@ -8,6 +8,7 @@ import org.isln.market.controller.request.ItemRequestParameters;
 import org.isln.market.dto.CartAction;
 import org.isln.market.dto.SortType;
 import org.isln.market.exception.ObjectNotFoundException;
+import org.isln.market.model.Cart;
 import org.isln.market.model.Item;
 import org.isln.market.repository.ItemRepository;
 import org.springframework.data.domain.Page;
@@ -53,6 +54,10 @@ public class ItemService {
             throw new RuntimeException("Unknown action '" + action + "'");
         }
         return item;
+    }
+
+    public Cart getCart() {
+        return new Cart(itemRepository.findByCountGreaterThan(0));
     }
 
     private Page<Item> find(PageRequest pageRequest) {

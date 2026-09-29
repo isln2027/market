@@ -12,4 +12,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAll();
 
     Page<Item> findByTitleContainingOrDescriptionContaining(Pageable pageable, String title, String description);
+
+    List<Item> findByCountGreaterThan(int count);
 }
