@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -32,5 +33,9 @@ public class OrderController {
         return "order";
     }
 
-
+    @PostMapping("/buy")
+    public String createOrder(Model model) {
+        Order newOrder = orderService.create();
+        return "redirect:/orders/%s?newOrder=true".formatted(newOrder.getId());
+    }
 }

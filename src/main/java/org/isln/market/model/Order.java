@@ -27,10 +27,18 @@ public class Order {
     @JoinTable(name = "ordered_items",
             joinColumns = @JoinColumn(name = "order_id"),
             inverseJoinColumns = @JoinColumn(name = "item_id"))
-    private Cart items;
+    private List<Item> items;
 
-    public Long getTotalPrice() {
-        return items.getTotalPrice();
+    public Long totalSum() {
+        return new Cart(items).getTotalPrice();
+    }
+
+    public Long id() {
+        return id;
+    }
+
+    public List<Item> items() {
+        return items;
     }
 }
 
