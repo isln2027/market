@@ -50,6 +50,8 @@ public class ItemService {
             item.addToCart();
         } else if (action == CartAction.MINUS) {
             item.removeFromCart();
+        } else if (action == CartAction.DELETE) {
+            item.setCount(0);
         } else {
             throw new RuntimeException("Unknown action '" + action + "'");
         }
