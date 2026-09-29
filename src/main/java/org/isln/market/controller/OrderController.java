@@ -34,7 +34,7 @@ public class OrderController {
     }
 
     @PostMapping("/buy")
-    public String createOrder(Model model) {
+    public String createOrder() {
         Order newOrder = orderService.create();
         return "redirect:/orders/%s?newOrder=true".formatted(newOrder.getId());
     }

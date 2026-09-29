@@ -3,7 +3,6 @@ package org.isln.market.integration;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.isln.market.controller.ItemController;
 import org.isln.market.controller.request.ItemRequestParameters;
@@ -23,6 +22,7 @@ import org.springframework.ui.Model;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.isln.market.integration.ItemFactory.getItems;
 
 
 @SpringBootTest
@@ -51,7 +51,7 @@ class ItemTest {
 
         controller.findItems(parameters, model);
 
-        List<Item> items = getItems(model);
+        List<Item> items = extractItems(model);
         assertThat(items.stream().map(Item::getId).toList())
                 .containsExactlyElementsOf(
                         itemsToCreate.stream()
@@ -71,7 +71,7 @@ class ItemTest {
 
         controller.findItems(parameters, model);
 
-        List<Item> items = getItems(model);
+        List<Item> items = extractItems(model);
         assertThat(items.stream().map(Item::getId).toList())
                 .containsExactlyElementsOf(
                         itemsToCreate.stream()
@@ -92,7 +92,7 @@ class ItemTest {
 
         controller.findItems(parameters, model);
 
-        List<Item> items = getItemsWithDummies(model);
+        List<Item> items = extractItemsWithDummies(model);
         int size = items.size();
         assertThat(size % maxItemsInRow).isEqualTo(0);
         assertThat(size).isLessThanOrEqualTo(pageSize + maxItemsInRow - (pageSize % maxItemsInRow));
@@ -115,7 +115,7 @@ class ItemTest {
 
         controller.findItems(parameters, model);
 
-        List<Item> items = getItemsWithDummies(model);
+        List<Item> items = extractItemsWithDummies(model);
         int size = items.size();
         assertThat(size % maxItemsInRow).isEqualTo(0);
         assertThat(size).isLessThanOrEqualTo(pageSize + maxItemsInRow - (pageSize % maxItemsInRow));
@@ -138,7 +138,7 @@ class ItemTest {
 
         controller.findItems(parameters, model);
 
-        List<Item> items = getItemsWithDummies(model);
+        List<Item> items = extractItemsWithDummies(model);
         int size = items.size();
         assertThat(size % maxItemsInRow).isEqualTo(0);
         assertThat(size).isLessThanOrEqualTo(pageSize + maxItemsInRow - (pageSize % maxItemsInRow));
@@ -171,7 +171,7 @@ class ItemTest {
 
         controller.findItems(parameters, model);
 
-        List<Item> items = getItems(model);
+        List<Item> items = extractItems(model);
         assertThat(items).hasSize(2);
         assertThat(items).anyMatch(item -> description.equals(item.getDescription()));
         assertThat(items).anyMatch(item -> title.equals(item.getTitle()));
@@ -191,7 +191,7 @@ class ItemTest {
 
         controller.findItems(parameters, model);
 
-        List<Item> items = getItems(model);
+        List<Item> items = extractItems(model);
         assertThat(items).hasSize(1);
         assertThat(items).anyMatch(item -> item.getTitle().equals("Item 2"));
     }
@@ -210,31 +210,18 @@ class ItemTest {
 
         controller.findItems(parameters, model);
 
-        List<Item> items = getItems(model);
+        List<Item> items = extractItems(model);
         assertThat(items).hasSize(1);
         assertThat(items).anyMatch(item -> item.getDescription().equals("Description 2"));
     }
 
 
-    private @NotNull List<Item> getItems(Model model) {
+    private @NotNull List<Item> extractItems(Model model) {
         return unwrapAndFilterDummies((List<List<Item>>) model.getAttribute("items"));
     }
 
-    private @NotNull List<Item> getItemsWithDummies(Model model) {
+    private @NotNull List<Item> extractItemsWithDummies(Model model) {
         return unwrap((List<List<Item>>) model.getAttribute("items"));
-    }
-
-    private static @NotNull List<Item> getItems(int count) {
-        return Stream
-                .iterate(1L, i -> i + 1)
-                .limit(count)
-                .map(
-                        i -> new Item()
-                                .setTitle("Item " + i)
-                                .setDescription("Description " + i)
-                                .setPrice(Math.round(Math.random() * 1000))
-                )
-                .toList();
     }
 
     private List<Item> unwrap(List<List<Item>> itemRows) {
