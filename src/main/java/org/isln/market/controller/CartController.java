@@ -26,7 +26,7 @@ public class CartController {
     }
 
     @PostMapping("/cart/items")
-    public Mono<Rendering> performAction(@ModelAttribute CartActionRequest request) {
+    public Mono<Rendering> performAction(CartActionRequest request) {
         return itemService.performAction(request.getId(), request.getAction())
                 .map(item -> Rendering.redirectTo("/cart/items").build());
     }
