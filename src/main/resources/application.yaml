@@ -10,6 +10,16 @@ spring:
       max-idle-time: 30s
       max-life-time: 10m
       validation-query: SELECT 1
+  sql:
+    init:
+      mode: always
+  logging:
+    level:
+      DEBUG
+
+logging:
+  level:
+    io.r2dbc.postgresql.QUERY: DEBUG
 
 application:
   view:
