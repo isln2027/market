@@ -3,15 +3,16 @@ package org.isln.market.service;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Mono;
 
 import org.isln.market.controller.request.ItemRequestParameters;
 import org.isln.market.dto.CartAction;
 import org.isln.market.dto.SortType;
-import org.isln.market.exception.ObjectNotFoundException;
 import org.isln.market.model.Cart;
 import org.isln.market.model.Item;
 import org.isln.market.repository.ItemRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class ItemService {
             SortType.PRICE, Sort.by(Sort.Order.asc("price"))
     );
 
-    public Page<Item> find(ItemRequestParameters parameters) {
+    public Mono<Page<Item>> find(ItemRequestParameters parameters) {
         SortType sortType = parameters.getSort();
         if (!SORT.containsKey(sortType)) {
             throw new IllegalArgumentException("Unknown sort type '" + sortType + "'");
@@ -39,38 +40,50 @@ public class ItemService {
         return search == null ? find(pageRequest) : find(pageRequest, search);
     }
 
-    public Item findById(Long id) {
-        return itemRepository.findById(id).orElseThrow(() -> new ObjectNotFoundException("Товар не найден!"));
+    public Mono<Item> findById(Long id) {
+        return itemRepository.findById(id);
     }
 
     @Transactional
-    public Item performAction(Long id, CartAction action) {
-        Item item = findById(id);
-        if (action == CartAction.PLUS) {
-            item.addToCart();
-        } else if (action == CartAction.MINUS) {
-            item.removeFromCart();
-        } else if (action == CartAction.DELETE) {
-            item.setCount(0);
-        } else {
-            throw new RuntimeException("Unknown action '" + action + "'");
-        }
-        return item;
+    public Mono<Item> performAction(Long id, CartAction action) {
+        return findById(id)
+                .map(item -> {
+                    if (action == CartAction.PLUS) {
+                        item.addToCart();
+                    } else if (action == CartAction.MINUS) {
+                        item.removeFromCart();
+                    } else if (action == CartAction.DELETE) {
+                        item.setCount(0);
+                    } else {
+                        throw new RuntimeException("Unknown action '" + action + "'");
+                    }
+                    return item;
+                })
+                .flatMap(itemRepository::save);
     }
 
-    public Cart getCart() {
-        return new Cart(itemRepository.findByCountGreaterThan(0));
+    public Mono<Cart> getCart() {
+        return itemRepository.findByCountGreaterThan(0).collectList().map(Cart::new);
     }
 
-    private Page<Item> find(PageRequest pageRequest) {
-        return itemRepository.findAll(pageRequest);
+    public Mono<Void> cleanupCart() {
+        return itemRepository.saveAll(itemRepository.findAll().map(item -> item.setCount(0))).then();
     }
 
-    private Page<Item> find(PageRequest pageRequest, String search) {
-        return itemRepository.findByTitleContainingOrDescriptionContaining(
-                pageRequest,
-                search,
-                search
-        );
+    private Mono<Page<Item>> find(PageRequest pageRequest) {
+        return Mono.zip(
+                itemRepository.findBy(pageRequest).collectList(),
+                itemRepository.count()
+        ).map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
+    }
+
+    private Mono<Page<Item>> find(PageRequest pageRequest, String search) {
+        return Mono.zip(
+                        itemRepository
+                                .findByTitleContainingOrDescriptionContaining(search, search, pageRequest)
+                                .collectList(),
+                        itemRepository.countByTitleContainingOrDescriptionContaining(search, search)
+                )
+                .map(tuple -> new PageImpl<>(tuple.getT1(), pageRequest, tuple.getT2()));
     }
 }
