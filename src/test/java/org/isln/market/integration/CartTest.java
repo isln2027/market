@@ -1,9 +1,13 @@
 package org.isln.market.integration;
 
 import java.util.List;
+import java.util.Map;
+
+import reactor.core.publisher.Mono;
 
 import org.isln.market.controller.CartController;
 import org.isln.market.controller.OrderController;
+import org.isln.market.controller.request.CartActionRequest;
 import org.isln.market.dto.CartAction;
 import org.isln.market.model.Cart;
 import org.isln.market.model.Item;
@@ -12,8 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
-import org.springframework.ui.ExtendedModelMap;
-import org.springframework.ui.Model;
+import org.springframework.web.reactive.result.view.Rendering;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -32,19 +35,24 @@ public class CartTest {
 
     @Test
     public void cartCreatedTest() {
-        List<Item> items = getItems(5);
-        itemRepository.saveAll(items);
-        Item first = items.getFirst();
-        cartController.performAction(first.getId(), CartAction.PLUS);
-        cartController.performAction(first.getId(), CartAction.PLUS);
-        Item second = items.get(1);
-        cartController.performAction(second.getId(), CartAction.PLUS);
-        Model model = new ExtendedModelMap();
+        List<Item> items = getItems(3);
 
-        cartController.getCart(model);
+        Mono<Void> prepare = Mono.zip(
+                itemRepository.save(items.getFirst()).flatMap(item -> addToCart(item).then(Mono.just(item))),
+                itemRepository.save(items.get(1)).flatMap(this::addToCart),
+                itemRepository.save(items.get(2))
+        ).then();
 
-        Cart cart = (Cart) model.getAttribute("items");
+        Rendering rendering = prepare.then(cartController.getCart()).block();
+
+        assertThat(rendering).isNotNull();
+        Map<String, Object> model = rendering.modelAttributes();
+        Cart cart = (Cart) model.get("items");
         assertThat(cart).hasSize(2);
-        assertThat((Long) model.getAttribute("total")).isEqualTo(cart.getTotalPrice());
+        assertThat((Long) model.get("total")).isEqualTo(cart.getTotalPrice());
+    }
+
+    private Mono<Rendering> addToCart(Item i) {
+        return cartController.performAction(new CartActionRequest(i.getId(), CartAction.PLUS));
     }
 }

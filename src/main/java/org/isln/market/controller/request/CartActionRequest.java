@@ -12,4 +12,9 @@ import org.isln.market.dto.CartAction;
 public class CartActionRequest extends ItemRequestParameters {
     private Long id;
     private CartAction action;
+
+    public CartActionRequest(Long id, CartAction cartAction) {
+        this.id = id;
+        this.action = cartAction;
+    }
 }
