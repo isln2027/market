@@ -2,7 +2,7 @@ services:
   market:
     container_name: market
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile
     image: market
     restart: on-failure
