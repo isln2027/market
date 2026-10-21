@@ -4,10 +4,12 @@ import reactor.core.publisher.Mono;
 
 import org.isln.payment.api.PaymentApi;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
+@Profile("production")
 public class PaymentClient implements PaymentApi {
     private final WebClient client;
 
