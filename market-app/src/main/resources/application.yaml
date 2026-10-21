@@ -25,3 +25,7 @@ application:
   view:
     item:
       max-items-in-row: 3
+
+payment:
+  api:
+    path: ${PAYMENT_SCHEMA:http}://${PAYMENT_HOST:localhost}:${PAYMENT_POST:8081}
