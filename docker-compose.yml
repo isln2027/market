@@ -2,8 +2,7 @@ services:
   market:
     container_name: market
     build:
-      context: ..
-      dockerfile: Dockerfile
+      dockerfile: market-app/Dockerfile
     image: market
     restart: on-failure
     ports:
