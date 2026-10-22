@@ -11,9 +11,7 @@ import org.springframework.stereotype.Service;
 public class DevelopPaymentClient implements PaymentApi {
     @Override
     public Mono<Boolean> canPay(long amount) {
-        boolean can = false;
-        System.out.println("DEV payment: returning " + can);
-        return Mono.just(can);
+        return Mono.just(true);
     }
 
     @Override
