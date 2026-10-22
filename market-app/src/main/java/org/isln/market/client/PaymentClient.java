@@ -20,8 +20,7 @@ public class PaymentClient implements PaymentApi {
     @Override
     public Mono<Boolean> canPay(long amount) {
         return client.get()
-                .uri("/can-pay")
-                .attribute("amount", amount)
+                .uri("/can-pay?amount={amount}", amount)
                 .retrieve()
                 .bodyToMono(Boolean.class);
     }
@@ -29,8 +28,7 @@ public class PaymentClient implements PaymentApi {
     @Override
     public Mono<Void> pay(long amount) {
         return client.post()
-                .uri("/pay")
-                .attribute("amount", amount)
+                .uri("/pay?amount={amount}", amount)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
