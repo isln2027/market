@@ -15,6 +15,18 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      PAYMENT_PORT: ${PAYMENT_PORT}
+      SPRING_PROFILES_ACTIVE: production
+  payment:
+    container_name: payment-service
+    build:
+      dockerfile: payment-service/Dockerfile
+    image: payment-service
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    environment:
+      PAYMENT_PORT: ${PAYMENT_PORT}
       SPRING_PROFILES_ACTIVE: production
 
   db:
