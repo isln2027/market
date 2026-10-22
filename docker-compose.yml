@@ -3,7 +3,7 @@ services:
     container_name: market
     build:
       dockerfile: market-app/Dockerfile
-    image: market
+    image: market-app
     restart: on-failure
     ports:
       - "8080:8080"
