@@ -5,13 +5,14 @@ import reactor.core.publisher.Mono;
 
 import org.isln.payment.service.AdminService;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.result.view.Rendering;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Controller
 @RequestMapping("/admin/balance")
@@ -32,9 +33,13 @@ public class AdminController {
     }
 
     @ExceptionHandler(Exception.class)
-    public Mono<String> handle(Exception error, Model model) {
+    public Mono<Rendering> handle(Exception error) {
         String message = error.getMessage();
-        model.addAttribute("message", message == null ? "Что то пошло не так" : message);
-        return Mono.just("error");
+        return Mono.just(
+                Rendering.view("error")
+                .status(BAD_REQUEST)
+                .modelAttribute("message", message == null ? "Что то пошло не так" : message)
+                .build()
+        );
     }
 }
