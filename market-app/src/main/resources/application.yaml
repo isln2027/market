@@ -22,6 +22,8 @@ logging:
     io.r2dbc.postgresql.QUERY: DEBUG
 
 application:
+  upload:
+    path: market-app/uploads
   view:
     item:
       max-items-in-row: 3

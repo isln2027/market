@@ -24,14 +24,14 @@ public class OrderDataAccessService {
                 .groupBy(OrderedItem::getOrderId)
                 .flatMap(
                         orderedItems -> orderedItems
-                                .map(mapper::mapItem)
+                                .map(mapper::map)
                                 .collectList()
                                 .map(items -> new Order().setId(orderedItems.key()).setItems(items))
                 );
     }
 
     public Mono<Order> findByIdWithItems(Long id) {
-        Flux<Item> items =  orderRepository.findOrderedItems(id).map(mapper::mapItem);
+        Flux<Item> items =  orderRepository.findOrderedItems(id).map(mapper::map);
         return orderRepository.findById(id)
                 .flatMap(o -> items.collectList().flatMap(list -> Mono.just(o.setItems(list))));
     }
