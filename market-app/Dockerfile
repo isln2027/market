@@ -20,5 +20,6 @@ RUN ./mvnw -B clean package -DskipTests -pl market-app -am
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/market-app/target/*.jar app.jar
+COPY market-app/uploads ./market-app/uploads
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
