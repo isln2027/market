@@ -1,8 +1,10 @@
 package org.isln.market.service;
 
+import java.util.List;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.isln.market.controller.request.ItemRequestParameters;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +33,10 @@ public class ItemService {
             SortType.ALPHA, Sort.by(Sort.Order.asc("title")),
             SortType.PRICE, Sort.by(Sort.Order.asc("price"))
     );
+
+    public Mono<Item> create(Item item) {
+        return itemRepository.save(item);
+    }
 
     public Mono<Page<Item>> find(ItemRequestParameters parameters) {
         SortType sortType = parameters.getSort();
