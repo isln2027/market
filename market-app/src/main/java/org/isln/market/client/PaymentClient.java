@@ -2,6 +2,7 @@ package org.isln.market.client;
 
 import reactor.core.publisher.Mono;
 
+import org.isln.market.exception.PaymentFailedException;
 import org.isln.payment.api.PaymentApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
@@ -30,6 +31,7 @@ public class PaymentClient implements PaymentApi {
         return client.post()
                 .uri("/pay?amount={amount}", amount)
                 .retrieve()
-                .bodyToMono(Void.class);
+                .bodyToMono(Void.class)
+                .onErrorMap(PaymentFailedException::new);
     }
 }
