@@ -19,6 +19,7 @@ services:
       PAYMENT_HOST: ${PAYMENT_HOST}
       PAYMENT_PORT: ${PAYMENT_PORT}
       SPRING_PROFILES_ACTIVE: production
+
   payment:
     container_name: payment-service
     build:
@@ -26,7 +27,7 @@ services:
     image: payment-service
     restart: on-failure
     ports:
-      - "8081:8081"
+      - "${PAYMENT_PORT}:8081"
     environment:
       PAYMENT_PORT: ${PAYMENT_PORT}
       SPRING_PROFILES_ACTIVE: production
@@ -42,7 +43,13 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
+  cache:
+    container_name: redis
+    image: redis:8.10
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
 
 volumes:
   db-data:
