@@ -3,6 +3,7 @@ package org.isln.market.client;
 import reactor.core.publisher.Mono;
 
 import org.isln.payment.api.PaymentApi;
+import org.isln.payment.api.PaymentResult;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ public class DevelopPaymentClient implements PaymentApi {
     }
 
     @Override
-    public Mono<Void> pay(long amount) {
-        return Mono.empty();
+    public Mono<PaymentResult> pay(long amount) {
+        return Mono.just(PaymentResult.SUCCESS);
     }
 }

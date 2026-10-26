@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class Cart extends ArrayList<Item> {
-    private boolean canBuy;
+    private Boolean canBuy;
 
-    public boolean canBuy() {
+    public Boolean canBuy() {
         return canBuy;
     }
 
@@ -24,5 +24,9 @@ public class Cart extends ArrayList<Item> {
 
     public Cart(Collection<Item> items) {
         super(items);
+    }
+
+    public Cart() {
+        super();
     }
 }

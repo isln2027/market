@@ -3,7 +3,10 @@ package org.isln.market.client;
 import reactor.core.publisher.Mono;
 
 import org.isln.market.exception.PaymentFailedException;
+import org.isln.market.exception.PaymentServiceException;
 import org.isln.payment.api.PaymentApi;
+import org.isln.payment.api.PaymentResult;
+import org.isln.payment.exception.InsufficientFundsException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -27,11 +30,11 @@ public class PaymentClient implements PaymentApi {
     }
 
     @Override
-    public Mono<Void> pay(long amount) {
+    public Mono<PaymentResult> pay(long amount) {
         return client.post()
                 .uri("/pay?amount={amount}", amount)
                 .retrieve()
-                .bodyToMono(Void.class)
-                .onErrorMap(PaymentFailedException::new);
+                .bodyToMono(PaymentResult.class)
+                .onErrorMap(Throwable.class, PaymentServiceException::new);
     }
 }

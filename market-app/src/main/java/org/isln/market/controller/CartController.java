@@ -20,10 +20,14 @@ public class CartController {
     @GetMapping("/cart/items")
     public Mono<Rendering> getCart() {
         return itemService.getCart().map(
-                cart -> Rendering.view("cart")
-                        .modelAttribute("items", cart)
-                        .modelAttribute("total", cart.getTotalPrice())
-                        .build());
+                cart -> {
+                    System.out.println(cart.canBuy());
+                    return Rendering.view("cart")
+                            .modelAttribute("items", cart)
+                            .modelAttribute("total", cart.getTotalPrice())
+                            .build();
+                }
+        );
     }
 
     @PostMapping("/cart/items")

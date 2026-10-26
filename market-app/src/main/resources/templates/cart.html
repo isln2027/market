@@ -49,7 +49,12 @@
                 <form action="/buy" method="post" th:if="${!items.isEmpty()}">
                     <div class="hstack gap-3">
                         <h2 th:text="'Итого: '+${total}+' руб.'"/>
-                        <button th:disabled="${!items.canBuy()}" class="btn btn-warning ms-auto">Купить</button>
+                        <button th:disabled="${items.canBuy() == null || !items.canBuy()}" class="btn btn-warning ms-auto">Купить</button>
+                        <div th:switch="${items.canBuy()}" class="ms-auto">
+                            <span th:case="null"  class="text-danger">Оплата недоступна</span>
+                            <span th:case="false" class="text-danger">Недостаточно средств</span>
+                            <span th:case="*"     class="text-muted">Покупка доступна</span>
+                        </div>
                     </div>
                 </form>
             </div>

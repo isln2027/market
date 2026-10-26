@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import reactor.core.publisher.Mono;
 
-import org.isln.payment.exception.InsufficientFundsException;
+import org.isln.payment.api.PaymentResult;
 import org.isln.payment.service.AdminService;
 import org.isln.payment.service.PaymentService;
 import org.springframework.stereotype.Service;
@@ -17,17 +17,18 @@ public class BalanceManager implements AdminService, PaymentService {
         return Mono.fromCallable(balance::get);
     }
 
-    public Mono<Void> pay(long amount) {
-        return Mono.fromRunnable(
+    public Mono<PaymentResult> pay(long amount) {
+        return Mono.fromCallable(
                 () -> {
                     long current, next;
                     do {
                         current = balance.get();
                         if (current < amount) {
-                            throw new InsufficientFundsException();
+                            return PaymentResult.INSUFFICIENT_FUNDS;
                         }
                         next = current - amount;
                     } while (!balance.compareAndSet(current, next));
+                    return PaymentResult.SUCCESS;
                 }
         );
     }
