@@ -1,3 +1,14 @@
+application:
+  upload:
+    path: market-app/uploads
+  view:
+    item:
+      max-items-in-row: 3
+
+logging:
+  level:
+    io.r2dbc.postgresql.QUERY: DEBUG
+
 spring:
   r2dbc:
     url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:market}
@@ -13,20 +24,16 @@ spring:
   sql:
     init:
       mode: always
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cache:
+    redis:
+      time-to-live: PT1M
   logging:
     level:
       DEBUG
-
-logging:
-  level:
-    io.r2dbc.postgresql.QUERY: DEBUG
-
-application:
-  upload:
-    path: market-app/uploads
-  view:
-    item:
-      max-items-in-row: 3
 
 payment:
   api:

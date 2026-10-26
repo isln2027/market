@@ -14,4 +14,9 @@ public class ItemRequestParameters {
     private SortType sort = SortType.NO;
     private Integer pageNumber = 1;
     private Integer pageSize = 5;
+
+    @Override
+    public String toString() {
+        return search + ":" + sort + ":" + pageSize + ":" + pageNumber;
+    }
 }

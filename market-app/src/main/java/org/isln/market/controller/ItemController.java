@@ -13,12 +13,12 @@ import org.isln.market.controller.request.ItemRequestParameters;
 import org.isln.market.dto.ItemDto;
 import org.isln.market.dto.Paging;
 import org.isln.market.model.Item;
+import org.isln.market.model.ItemPage;
 import org.isln.market.service.FileService;
 import org.isln.market.service.ItemModelAdapter;
 import org.isln.market.service.ItemService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -101,7 +101,7 @@ public class ItemController {
         );
     }
 
-    private Map<String, Object> getAttributes(ItemRequestParameters parameters, Page<Item> page) {
+    private Map<String, Object> getAttributes(ItemRequestParameters parameters, ItemPage page) {
         Map<String, Object> attributes = new HashMap<>();
         List<List<Item>> items = ItemModelAdapter.putItemsInRows(page.getContent(), maxItemsInRow);
         attributes.put("sort", parameters.getSort().name());
@@ -111,8 +111,8 @@ public class ItemController {
                 new Paging(
                         parameters.getPageSize(),
                         parameters.getPageNumber(),
-                        page.hasPrevious(),
-                        page.hasNext()
+                        page.getHasPrevious(),
+                        page.getHasNext()
                 )
         );
         return attributes;

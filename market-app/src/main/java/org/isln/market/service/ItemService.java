@@ -4,21 +4,21 @@ import java.util.List;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import org.isln.market.controller.request.ItemRequestParameters;
 import org.isln.market.dto.CartAction;
 import org.isln.market.dto.SortType;
 import org.isln.market.model.Cart;
 import org.isln.market.model.Item;
+import org.isln.market.model.ItemPage;
 import org.isln.market.repository.ItemRepository;
 import org.isln.payment.api.PaymentApi;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,11 +34,13 @@ public class ItemService {
             SortType.PRICE, Sort.by(Sort.Order.asc("price"))
     );
 
+    @CacheEvict(value = {"item", "items"})
     public Mono<Item> create(Item item) {
         return itemRepository.save(item);
     }
 
-    public Mono<Page<Item>> find(ItemRequestParameters parameters) {
+    @Cacheable(value = "items", key = "#parameters.toString()")
+    public Mono<ItemPage> find(ItemRequestParameters parameters) {
         SortType sortType = parameters.getSort();
         if (!SORT.containsKey(sortType)) {
             throw new IllegalArgumentException("Unknown sort type '" + sortType + "'");
@@ -49,10 +51,12 @@ public class ItemService {
         return search == null ? find(pageRequest) : find(pageRequest, search);
     }
 
+    @Cacheable(value = "item", key = "#id")
     public Mono<Item> findById(Long id) {
         return itemRepository.findById(id);
     }
 
+    @CacheEvict(value = {"item", "items", "cart"}, allEntries = true)
     @Transactional
     public Mono<Item> performAction(Long id, CartAction action) {
         return findById(id)
@@ -71,6 +75,7 @@ public class ItemService {
                 .flatMap(itemRepository::save);
     }
 
+    @Cacheable(value = "cart")
     public Mono<Cart> getCart() {
         return itemRepository.findByCountGreaterThan(0)
                 .collectList()
@@ -78,24 +83,43 @@ public class ItemService {
                 .flatMap(c -> paymentApi.canPay(c.getTotalPrice()).map(c::setCanBuy));
     }
 
+    @CacheEvict(value = "cart")
     public Mono<Void> cleanupCart() {
         return itemRepository.saveAll(itemRepository.findAll().map(item -> item.setCount(0))).then();
     }
 
-    private Mono<Page<Item>> find(PageRequest pageRequest) {
+    private Mono<ItemPage> find(PageRequest pageRequest) {
         return Mono.zip(
-                itemRepository.findBy(pageRequest).collectList(),
-                itemRepository.count()
-        ).map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
+                        itemRepository.findBy(pageRequest).collectList(),
+                        itemRepository.count()
+                )
+                .map(tuple -> map(pageRequest, tuple));
     }
 
-    private Mono<Page<Item>> find(PageRequest pageRequest, String search) {
+    private Mono<ItemPage> find(PageRequest pageRequest, String search) {
         return Mono.zip(
                         itemRepository
                                 .findByTitleContainingOrDescriptionContaining(search, search, pageRequest)
                                 .collectList(),
                         itemRepository.countByTitleContainingOrDescriptionContaining(search, search)
                 )
-                .map(tuple -> new PageImpl<>(tuple.getT1(), pageRequest, tuple.getT2()));
+                .map(tuple -> map(pageRequest, tuple));
+    }
+
+    private static ItemPage map(PageRequest pageRequest, Tuple2<List<Item>, Long> tuple) {
+        return new ItemPage()
+                .setContent(tuple.getT1())
+                .setHasPrevious(pageRequest.getPageNumber() > 0)
+                .setHasNext(
+                        hasNext(
+                                tuple.getT2(),
+                                pageRequest.getPageNumber(),
+                                pageRequest.getPageSize()
+                        )
+                );
+    }
+
+    private static Boolean hasNext(long total, int pageNumber, int pageSize) {
+        return (total / pageSize) > pageNumber + 1;
     }
 }

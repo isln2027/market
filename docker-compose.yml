@@ -18,6 +18,8 @@ services:
       PAYMENT_SCHEMA: ${PAYMENT_SCHEMA}
       PAYMENT_HOST: ${PAYMENT_HOST}
       PAYMENT_PORT: ${PAYMENT_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
       SPRING_PROFILES_ACTIVE: production
 
   payment:

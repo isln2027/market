@@ -10,6 +10,7 @@ import reactor.core.publisher.Mono;
 import org.isln.market.model.Item;
 import org.isln.market.repository.ItemRepository;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class AdminService {
     private final ItemRepository itemRepository;
 
     @EventListener
+    @CacheEvict(value = "items", allEntries = true)
     public void populate(ApplicationStartedEvent event) {
         itemRepository.count()
                 .flatMap(count -> {
