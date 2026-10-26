@@ -22,13 +22,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
+import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.result.view.Rendering;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.isln.market.integration.ItemFactory.getItems;
 
-
+@ActiveProfiles("test")
 @SpringBootTest
 @Testcontainers
 @ImportTestcontainers(PostgresContainer.class)

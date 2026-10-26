@@ -120,6 +120,6 @@ public class ItemService {
     }
 
     private static Boolean hasNext(long total, int pageNumber, int pageSize) {
-        return (total / pageSize) > pageNumber + 1;
+        return Math.ceilDiv(total, pageSize) > pageNumber + 1;
     }
 }
