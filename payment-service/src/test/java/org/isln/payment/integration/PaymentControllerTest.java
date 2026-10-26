@@ -1,5 +1,6 @@
 package org.isln.payment.integration;
 
+import org.isln.payment.api.PaymentResult;
 import org.isln.payment.controller.AdminController;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_CONTENT;
 
 @AutoConfigureWebTestClient
@@ -72,6 +74,7 @@ public class PaymentControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
+                .expectBody(PaymentResult.class).isEqualTo(PaymentResult.SUCCESS)
                 .returnResult();
 
         Long newBalance = (Long) adminController.showBalance().block().modelAttributes().get("balance");
@@ -91,7 +94,8 @@ public class PaymentControllerTest {
                 .uri("/pay?amount=30")
                 .exchange()
                 .expectStatus()
-                .isEqualTo(UNPROCESSABLE_CONTENT)
+                .isOk()
+                .expectBody(PaymentResult.class).isEqualTo(PaymentResult.INSUFFICIENT_FUNDS)
                 .returnResult();
 
         Long newBalance = (Long) adminController.showBalance().block().modelAttributes().get("balance");
