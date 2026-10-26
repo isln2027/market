@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.web.PagedModel;
 
 @Configuration
@@ -56,6 +57,19 @@ public class RedisConfiguration {
                         .serializeValuesWith(
                                 RedisSerializationContext.SerializationPair.fromSerializer(
                                         new JacksonJsonRedisSerializer<>(Cart.class)
+                                )
+                        )
+        );
+    }
+
+    @Bean
+    public RedisCacheManagerBuilderCustomizer fileSerializer() {
+        return builder -> builder.withCacheConfiguration(
+                "file",
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .serializeValuesWith(
+                                RedisSerializationContext.SerializationPair.fromSerializer(
+                                        RedisSerializer.byteArray()
                                 )
                         )
         );

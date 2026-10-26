@@ -18,6 +18,7 @@ import org.isln.market.service.FileService;
 import org.isln.market.service.ItemModelAdapter;
 import org.isln.market.service.ItemService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -59,12 +60,13 @@ public class ItemController {
     @GetMapping({"/items/image"})
     public Mono<ResponseEntity<Resource>> findImage(@RequestParam String filename) {
         return fileService.getFile(filename)
+                .map(ByteArrayResource::new)
                 .map(
                         file -> ResponseEntity.ok()
                                 .contentType(MediaTypeFactory.getMediaType(file).orElse(MediaType.APPLICATION_OCTET_STREAM))
                                 .header(HttpHeaders.CONTENT_DISPOSITION,
                                         ContentDisposition.attachment()
-                                                .filename(file.getFilename())
+                                                .filename(filename)
                                                 .build()
                                                 .toString())
                                 .body(file)

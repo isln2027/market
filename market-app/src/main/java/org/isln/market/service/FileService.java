@@ -8,6 +8,8 @@ import java.nio.file.Paths;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.codec.multipart.FilePart;
@@ -29,12 +31,14 @@ public class FileService {
         this.uploadPath = uploadPath;
     }
 
+    @CacheEvict(value = "file", key = "#file.filename()")
     public Mono<String> save(FilePart file) {
         String filename = file.filename();
         return file.transferTo(Path.of(uploadPath, filename)).then(Mono.just(filename));
     }
 
-    public Mono<Resource> getFile(String name) {
-        return Mono.fromCallable(() -> new FileSystemResource(Path.of(uploadPath, name)));
+    @Cacheable(value = "file", key = "#name")
+    public Mono<byte[]> getFile(String name) {
+        return Mono.fromCallable(() -> Files.readAllBytes(Path.of(uploadPath, name)));
     }
 }
