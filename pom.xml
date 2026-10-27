@@ -14,11 +14,11 @@
     <packaging>pom</packaging>
     <modules>
         <module>market-app</module>
-        <module>payment-api</module>
         <module>payment-service</module>
     </modules>
 
     <properties>
+        <payment.api.spec>${maven.multiModuleProjectDirectory}/payment-api-spec.yml</payment.api.spec>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
@@ -81,6 +81,11 @@
             <artifactId>json-path</artifactId>
             <version>2.10.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>3.1.0</version>
         </dependency>
         <!--        test            -->
         <dependency>

@@ -1,18 +1,18 @@
 package org.isln.payment.integration;
 
-import org.isln.payment.api.PaymentResult;
 import org.isln.payment.controller.AdminController;
+import org.isln.payment.model.MoneyContainer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.ExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpStatus.PRECONDITION_FAILED;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_CONTENT;
 
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
@@ -23,7 +23,7 @@ public class PaymentControllerTest {
     private AdminController adminController;
 
     @Test
-    public void canPayTest() {
+    public void getBalanceTest() {
         long balance = 10;
         webTestClient.post()
                 .uri("/admin/balance")
@@ -31,33 +31,16 @@ public class PaymentControllerTest {
                 .exchange()
                 .returnResult();
 
-        ExchangeResult result = webTestClient.get()
-                .uri("/can-pay?amount=5")
+        webTestClient.get()
+                .uri("/balance")
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .returnResult();
-
-        assertThat(new String(result.getResponseBodyContent())).isEqualTo(Boolean.TRUE.toString());
-    }
-
-    @Test
-    public void cannotPayTest() {
-        long balance = 10;
-        webTestClient.post()
-                .uri("/admin/balance")
-                .body(BodyInserters.fromFormData("balance", Long.toString(balance)))
-                .exchange()
-                .returnResult();
-
-        ExchangeResult result = webTestClient.get()
-                .uri("/can-pay?amount=50")
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .returnResult();
-
-        assertThat(new String(result.getResponseBodyContent())).isEqualTo(Boolean.FALSE.toString());
+                .expectBody(MoneyContainer.class)
+                .value(container -> {
+                    assertThat(container).isNotNull();
+                    assertThat(container.getAmount()).isEqualTo(balance);
+                });
     }
 
     @Test
@@ -70,15 +53,24 @@ public class PaymentControllerTest {
                 .returnResult();
 
         ExchangeResult result = webTestClient.post()
-                .uri("/pay?amount=3")
+                .uri("/pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new MoneyContainer().amount(3L))
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(PaymentResult.class).isEqualTo(PaymentResult.SUCCESS)
                 .returnResult();
 
-        Long newBalance = (Long) adminController.showBalance().block().modelAttributes().get("balance");
-        assertThat(newBalance).isEqualTo(7);
+        webTestClient.get()
+                .uri("/balance")
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(MoneyContainer.class)
+                .value(container -> {
+                    assertThat(container).isNotNull();
+                    assertThat(container.getAmount()).isEqualTo(7);
+                });
     }
 
     @Test
@@ -91,11 +83,12 @@ public class PaymentControllerTest {
                 .returnResult();
 
         ExchangeResult result = webTestClient.post()
-                .uri("/pay?amount=30")
+                .uri("/pay")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(new MoneyContainer().amount(20L))
                 .exchange()
                 .expectStatus()
-                .isOk()
-                .expectBody(PaymentResult.class).isEqualTo(PaymentResult.INSUFFICIENT_FUNDS)
+                .isEqualTo(HttpStatus.UNPROCESSABLE_CONTENT)
                 .returnResult();
 
         Long newBalance = (Long) adminController.showBalance().block().modelAttributes().get("balance");
