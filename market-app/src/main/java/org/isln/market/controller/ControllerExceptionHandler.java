@@ -3,9 +3,8 @@ package org.isln.market.controller;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
-import org.isln.market.exception.PaymentFailedException;
+import org.isln.market.exception.InsufficientFundsException;
 import org.isln.market.exception.PaymentServiceException;
-import org.isln.payment.exception.InsufficientFundsException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;

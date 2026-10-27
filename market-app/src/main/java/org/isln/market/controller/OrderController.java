@@ -45,6 +45,4 @@ public class OrderController {
     private static String newOrderUrl(Order newOrder) {
         return "/orders/%s?newOrder=true".formatted(newOrder.getId());
     }
-
-
 }

@@ -13,8 +13,8 @@ import org.isln.market.dto.SortType;
 import org.isln.market.model.Cart;
 import org.isln.market.model.Item;
 import org.isln.market.model.ItemPage;
+import org.isln.market.payment.PaymentService;
 import org.isln.market.repository.ItemRepository;
-import org.isln.payment.api.PaymentApi;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ItemService {
     private final ItemRepository itemRepository;
-    private final PaymentApi paymentApi;
+    private final PaymentService paymentApi;
 
     private static final Map<SortType, Sort> SORT = Map.of(
             SortType.NO, Sort.unsorted(),
