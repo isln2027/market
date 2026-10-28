@@ -31,7 +31,7 @@ public class ItemService {
             SortType.PRICE, Sort.by(Sort.Order.asc("price"))
     );
 
-    @CacheEvict(value = {"item", "items"}, allEntries = true)
+    @CacheEvict(value = {"items"}, allEntries = true)
     public Mono<Item> create(Item item) {
         return itemRepository.save(item);
     }

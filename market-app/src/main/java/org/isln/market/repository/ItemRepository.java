@@ -2,16 +2,21 @@ package org.isln.market.repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Flow;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.isln.market.model.Item;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.r2dbc.repository.R2dbcRepository;
 
 public interface ItemRepository extends R2dbcRepository<Item, Long> {
+    @CacheEvict(value = {"item", "items"}, allEntries = true)
+    Mono<Item> save(Item item);
+
     Flux<Item> findBy(Pageable pageable);
 
     @Query("SELECT items.count as count FROM items WHERE items.id = :id")
