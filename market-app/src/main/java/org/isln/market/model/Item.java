@@ -1,9 +1,11 @@
 package org.isln.market.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import org.isln.market.model.cache.CachedItem;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
@@ -12,6 +14,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Setter
 @Accessors(chain = true)
 @Table(name = "items")
+@NoArgsConstructor
 public class Item {
     @Id
     private Long id;
@@ -22,7 +25,7 @@ public class Item {
     private Integer count = 0;
 
     public void addToCart() {
-        this.setCount(count + 1);
+        count++;
     }
 
     public void removeFromCart() {
@@ -53,6 +56,15 @@ public class Item {
 
     public Integer count() {
         return count;
+    }
+
+    public Item(CachedItem item, Integer count) {
+        this.id = item.getId();
+        this.title = item.getTitle();
+        this.description = item.getDescription();
+        this.imgPath = item.getImgPath();
+        this.price = item.getPrice();
+        this.count = count;
     }
 }
 

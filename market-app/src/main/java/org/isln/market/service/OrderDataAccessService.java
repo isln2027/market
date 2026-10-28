@@ -10,6 +10,8 @@ import org.isln.market.model.OrderedItemConnection;
 import org.isln.market.repository.OrderRepository;
 import org.isln.market.repository.OrderedItemConnectionRepository;
 import org.isln.market.repository.projection.OrderedItem;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,6 +21,7 @@ public class OrderDataAccessService {
     private final OrderedItemConnectionRepository connectionRepository;
     private final ItemMapper mapper;
 
+    @Cacheable(value = "orders")
     public Flux<Order> findAllWithItems() {
         return orderRepository.findAllWithItems()
                 .groupBy(OrderedItem::getOrderId)
@@ -30,12 +33,14 @@ public class OrderDataAccessService {
                 );
     }
 
+    @Cacheable(value = "order", key = "#id")
     public Mono<Order> findByIdWithItems(Long id) {
         Flux<Item> items =  orderRepository.findOrderedItems(id).map(mapper::map);
         return orderRepository.findById(id)
                 .flatMap(o -> items.collectList().flatMap(list -> Mono.just(o.setItems(list))));
     }
 
+    @CacheEvict(value = "orders", allEntries = true)
     public Mono<Order> save(Order order) {
         return orderRepository.save(order)
                 .flatMap(savedOrder -> {

@@ -30,7 +30,7 @@ spring:
       port: ${REDIS_PORT:6379}
   cache:
     redis:
-      time-to-live: PT1M
+      time-to-live: 60
   logging:
     level:
       DEBUG

@@ -1,27 +1,31 @@
 package org.isln.market.configuration;
 
-import java.util.List;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
-import tools.jackson.databind.JavaType;
-import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.databind.type.TypeFactory;
+import lombok.RequiredArgsConstructor;
 
+import org.isln.market.model.cache.CachedItem;
 import org.isln.market.model.Cart;
-import org.isln.market.model.Item;
 import org.isln.market.model.ItemPage;
+import org.isln.market.model.cache.CachedItemPage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.cache.autoconfigure.RedisCacheManagerBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.web.PagedModel;
 
 @Configuration
 public class RedisConfiguration {
+    private final Integer ttl;
+
+    public RedisConfiguration(@Value("${spring.cache.redis.time-to-live:60}") Integer ttl) {
+        this.ttl = ttl;
+    }
+
     @Bean
     public RedisCacheManagerBuilderCustomizer itemSerializer() {
         return builder -> builder.withCacheConfiguration(
@@ -29,9 +33,10 @@ public class RedisConfiguration {
                 RedisCacheConfiguration.defaultCacheConfig()
                         .serializeValuesWith(
                                 RedisSerializationContext.SerializationPair.fromSerializer(
-                                        new JacksonJsonRedisSerializer<>(Item.class)
+                                        new JacksonJsonRedisSerializer<>(CachedItem.class)
                                 )
                         )
+                        .entryTtl(Duration.of(ttl, ChronoUnit.SECONDS))
 
         );
     }
@@ -43,22 +48,10 @@ public class RedisConfiguration {
                 RedisCacheConfiguration.defaultCacheConfig()
                         .serializeValuesWith(
                                 RedisSerializationContext.SerializationPair.fromSerializer(
-                                        new JacksonJsonRedisSerializer<>(ItemPage.class)
+                                        new JacksonJsonRedisSerializer<>(CachedItemPage.class)
                                 )
                         )
-        );
-    }
-
-    @Bean
-    public RedisCacheManagerBuilderCustomizer cartSerializer() {
-        return builder -> builder.withCacheConfiguration(
-                "cart",
-                RedisCacheConfiguration.defaultCacheConfig()
-                        .serializeValuesWith(
-                                RedisSerializationContext.SerializationPair.fromSerializer(
-                                        new JacksonJsonRedisSerializer<>(Cart.class)
-                                )
-                        )
+                        .entryTtl(Duration.of(ttl, ChronoUnit.SECONDS))
         );
     }
 
@@ -72,6 +65,7 @@ public class RedisConfiguration {
                                         RedisSerializer.byteArray()
                                 )
                         )
+                        .entryTtl(Duration.of(ttl, ChronoUnit.SECONDS))
         );
     }
 }
