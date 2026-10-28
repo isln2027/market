@@ -36,7 +36,6 @@ public class OrderDataAccessService {
                 .flatMap(o -> items.collectList().flatMap(list -> Mono.just(o.setItems(list))));
     }
 
-    // это приличный способ сохранять объект со связями?
     public Mono<Order> save(Order order) {
         return orderRepository.save(order)
                 .flatMap(savedOrder -> {

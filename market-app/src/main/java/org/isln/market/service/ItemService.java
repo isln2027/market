@@ -15,8 +15,6 @@ import org.isln.market.model.Item;
 import org.isln.market.model.ItemPage;
 import org.isln.market.payment.PaymentService;
 import org.isln.market.repository.ItemRepository;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -34,12 +32,10 @@ public class ItemService {
             SortType.PRICE, Sort.by(Sort.Order.asc("price"))
     );
 
-    @CacheEvict(value = {"item", "items"})
     public Mono<Item> create(Item item) {
         return itemRepository.save(item);
     }
 
-    @Cacheable(value = "items", key = "#parameters.toString()")
     public Mono<ItemPage> find(ItemRequestParameters parameters) {
         SortType sortType = parameters.getSort();
         if (!SORT.containsKey(sortType)) {
@@ -51,12 +47,10 @@ public class ItemService {
         return search == null ? find(pageRequest) : find(pageRequest, search);
     }
 
-    @Cacheable(value = "item", key = "#id")
     public Mono<Item> findById(Long id) {
         return itemRepository.findById(id);
     }
 
-    @CacheEvict(value = {"item", "items", "cart"}, allEntries = true)
     @Transactional
     public Mono<Item> performAction(Long id, CartAction action) {
         return findById(id)
@@ -75,7 +69,6 @@ public class ItemService {
                 .flatMap(itemRepository::save);
     }
 
-    @Cacheable(value = "cart")
     public Mono<Cart> getCart() {
         return itemRepository.findByCountGreaterThan(0)
                 .collectList()
@@ -83,7 +76,6 @@ public class ItemService {
                 .flatMap(c -> paymentApi.canPay(c.getTotalPrice()).map(c::setCanBuy));
     }
 
-    @CacheEvict(value = "cart")
     public Mono<Void> cleanupCart() {
         return itemRepository.saveAll(itemRepository.findAll().map(item -> item.setCount(0))).then();
     }
