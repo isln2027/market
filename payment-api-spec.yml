@@ -1,0 +1,46 @@
+openapi: 3.1.0
+info:
+  title: Payment api
+  version: 1.0.0
+paths:
+  /balance:
+    get:
+      tags:
+        - payment
+      summary: Получить текущий баланс
+      operationId: getBalance
+      responses:
+        '200':
+          description: Успешный ответ
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MoneyContainer'
+  /pay:
+    post:
+      tags:
+        - payment
+      summary: Оплатить покупку
+      operationId: pay
+      requestBody:
+        description: Сумма к оплате
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MoneyContainer'
+      responses:
+        '200':
+          description: Успешная оплата
+        '422':
+          description: Недостаточно средств
+
+components:
+  schemas:
+    MoneyContainer:
+      type: object
+      properties:
+        amount:
+          type: long
+      required:
+        - amount
