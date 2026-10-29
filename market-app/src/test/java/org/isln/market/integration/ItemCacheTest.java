@@ -4,12 +4,16 @@ import reactor.core.publisher.Mono;
 
 import org.isln.market.model.Item;
 import org.isln.market.repository.ItemRepository;
+import org.isln.market.repository.OrderRepository;
+import org.isln.market.repository.OrderedItemConnectionRepository;
 import org.isln.market.service.CachedItemDataAccessService;
 import org.isln.market.service.ItemService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.r2dbc.autoconfigure.R2dbcAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -17,15 +21,19 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 
 @SpringBootTest(properties = "spring.cache.redis.time-to-live=1")
 @Testcontainers
 @ImportTestcontainers(RedisCacheContainer.class)
+@EnableAutoConfiguration(exclude = {R2dbcAutoConfiguration.class})
 public class ItemCacheTest {
     @MockitoBean
     private ItemRepository itemRepository;
+    @MockitoBean
+    private OrderRepository orderRepository;
+    @MockitoBean
+    private OrderedItemConnectionRepository orderedItemConnectionRepository;
 
     @Autowired
     private ItemService itemService;
