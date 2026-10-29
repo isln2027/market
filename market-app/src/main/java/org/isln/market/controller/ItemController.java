@@ -57,6 +57,12 @@ public class ItemController {
         return itemService.findById(id).map(item -> Rendering.view("item").modelAttribute("item", item).build());
     }
 
+    @PostMapping({"/items/{id}"})
+    public Mono<Rendering> performCartAction(@PathVariable Long id, @ModelAttribute CartActionRequest parameters) {
+        return itemService.performAction(id, parameters.getAction())
+                .map(item -> Rendering.redirectTo("/items/" + id).build());
+    }
+
     @GetMapping({"/items/image"})
     public Mono<ResponseEntity<Resource>> findImage(@RequestParam String filename) {
         return fileService.getFile(filename)
