@@ -30,11 +30,11 @@ spring:
       port: ${REDIS_PORT:6379}
   cache:
     redis:
-      time-to-live: 5
+      time-to-live: 60
   logging:
     level:
       DEBUG
 
 payment:
   api:
-    path: ${PAYMENT_SCHEMA:http}://${PAYMENT_HOST:localhost}:${PAYMENT_POST:8081}
+    path: ${PAYMENT_SCHEMA:http}://${PAYMENT_HOST:localhost}:${PAYMENT_PORT:8081}
