@@ -8,6 +8,7 @@ COPY .mvn .mvn
 
 COPY market-app/pom.xml ./market-app/pom.xml
 COPY payment-service/pom.xml ./payment-service/pom.xml
+COPY payment-api-spec.yml ./payment-api-spec.yml
 
 RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline -B -pl payment-service -am
