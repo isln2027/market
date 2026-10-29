@@ -2,9 +2,17 @@ package org.isln.market.configuration;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
+import tools.jackson.databind.JavaType;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+
+import org.isln.market.model.Order;
 import org.isln.market.model.cache.CachedItem;
 import org.isln.market.model.Cart;
 import org.isln.market.model.ItemPage;
@@ -52,6 +60,36 @@ public class RedisConfiguration {
                                 )
                         )
                         .entryTtl(Duration.of(ttl, ChronoUnit.SECONDS))
+        );
+    }
+
+    @Bean
+    public RedisCacheManagerBuilderCustomizer orderSerializer() {
+        return builder -> builder.withCacheConfiguration(
+                "order",
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .serializeValuesWith(
+                                RedisSerializationContext.SerializationPair.fromSerializer(
+                                        new JacksonJsonRedisSerializer<>(Order.class)
+                                )
+                        )
+                        .entryTtl(Duration.of(ttl, ChronoUnit.SECONDS))
+        );
+    }
+
+    @Bean
+    public RedisCacheManagerBuilderCustomizer ordersSerializer(JsonMapper jsonMapper) {
+        JavaType orderFlux = jsonMapper.getTypeFactory().constructParametricType(Flux.class, Order.class);
+        return builder -> builder.withCacheConfiguration(
+                "orders",
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .serializeValuesWith(
+                                RedisSerializationContext.SerializationPair.fromSerializer(
+                                        new JacksonJsonRedisSerializer<>(orderFlux)
+                                )
+                        )
+                        .entryTtl(Duration.of(ttl, ChronoUnit.SECONDS))
+
         );
     }
 
