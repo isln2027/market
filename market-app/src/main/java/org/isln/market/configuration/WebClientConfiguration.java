@@ -11,6 +11,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfiguration {
     @Bean
     public PaymentApi getPaymentClient(@Value("${payment.api.path}") String paymentApiPath) {
-        return new PaymentApi(new ApiClient(WebClient.create(paymentApiPath)));
+        ApiClient apiClient = new ApiClient(WebClient.create(paymentApiPath));
+        apiClient.setBasePath(paymentApiPath);
+        return new PaymentApi(apiClient);
     }
 }
