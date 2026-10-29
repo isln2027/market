@@ -72,7 +72,10 @@ public class ItemService {
         return itemRepository.findByCountGreaterThan(0)
                 .collectList()
                 .map(Cart::new)
-                .flatMap(c -> paymentApi.canPay(c.getTotalPrice()).map(c::setCanBuy));
+                .flatMap(
+                        c -> paymentApi.canPay(c.getTotalPrice())
+                                .map(c::setCanBuy)
+                                .onErrorResume(e -> Mono.just(c)));
     }
 
     public Mono<Void> cleanupCart() {

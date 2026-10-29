@@ -23,7 +23,8 @@ public class ProductionPaymentService implements PaymentService {
     public Mono<Boolean> canPay(long amount) {
         return paymentApi.getBalance()
                 .map(MoneyContainer::getAmount)
-                .map(balance -> balance >= amount);
+                .map(balance -> balance >= amount)
+                .onErrorMap(Exception.class, PaymentServiceException::new);
     }
 
     @Override
