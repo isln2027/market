@@ -2,9 +2,8 @@ services:
   market:
     container_name: market
     build:
-      context: .
-      dockerfile: Dockerfile
-    image: market
+      dockerfile: market-app/Dockerfile
+    image: market-app
     restart: on-failure
     ports:
       - "8080:8080"
@@ -16,6 +15,23 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
+      PAYMENT_SCHEMA: ${PAYMENT_SCHEMA}
+      PAYMENT_HOST: ${PAYMENT_HOST}
+      PAYMENT_PORT: ${PAYMENT_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      SPRING_PROFILES_ACTIVE: production
+
+  payment:
+    container_name: payment-service
+    build:
+      dockerfile: payment-service/Dockerfile
+    image: payment-service
+    restart: on-failure
+    ports:
+      - "${PAYMENT_PORT}:8081"
+    environment:
+      PAYMENT_PORT: ${PAYMENT_PORT}
       SPRING_PROFILES_ACTIVE: production
 
   db:
@@ -29,7 +45,13 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
+  cache:
+    container_name: redis
+    image: redis:8.10
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
 
 volumes:
   db-data:

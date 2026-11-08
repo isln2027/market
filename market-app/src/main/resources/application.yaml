@@ -1,0 +1,40 @@
+application:
+  upload:
+    path: market-app/uploads
+  view:
+    item:
+      max-items-in-row: 3
+
+logging:
+  level:
+    io.r2dbc.postgresql.QUERY: DEBUG
+
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:market}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    pool:
+      enabled: true
+      initial-size: 10
+      max-size: 50
+      max-idle-time: 30s
+      max-life-time: 10m
+      validation-query: SELECT 1
+  sql:
+    init:
+      mode: always
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cache:
+    redis:
+      time-to-live: 60
+  logging:
+    level:
+      DEBUG
+
+payment:
+  api:
+    path: ${PAYMENT_SCHEMA:http}://${PAYMENT_HOST:localhost}:${PAYMENT_PORT:8081}
