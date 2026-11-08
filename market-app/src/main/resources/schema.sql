@@ -19,3 +19,9 @@ CREATE TABLE IF NOT EXISTS public.order_item_connection (
 	FOREIGN KEY (order_id) REFERENCES public.orders(id),
 	FOREIGN KEY (item_id) REFERENCES public.items(id)
 );
+
+CREATE TABLE IF NOT EXISTS public.users (
+	id bigserial primary key,
+	login varchar(255) UNIQUE NULL,
+	password varchar(255) NULL,
+);
