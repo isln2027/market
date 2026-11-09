@@ -10,6 +10,19 @@ logging:
     io.r2dbc.postgresql.QUERY: DEBUG
 
 spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: frontend-service
+            client-secret: C60oWwz1kYBhtY0LOhC1SFt8gzeAnMQH
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8180/realms/market
   r2dbc:
     url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:market}
     username: ${DB_USER:postgres}

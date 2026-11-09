@@ -46,6 +46,7 @@ services:
       - db-data:/var/lib/postgresql/data
     ports:
       - "${DB_PORT}:5432"
+
   cache:
     container_name: redis
     image: redis:8.10
@@ -53,5 +54,18 @@ services:
     ports:
       - "${REDIS_PORT}:6379"
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    command: start-dev
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 volumes:
   db-data:
