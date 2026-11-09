@@ -13,7 +13,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Accessors(chain = true)
 @Table(name = "users")
 @NoArgsConstructor
-public class User {
+public class MarketUser {
     @Id
     private Long id;
     private String login;

@@ -15,6 +15,11 @@
         Неверное имя пользователя или пароль
     </div>
 
+    <div th:if="${register}"
+         style="margin-bottom:12px; color:#2e7d32; font-size:14px;">
+        Новый пользователь зарегистрирован, можно зайти в систему.
+    </div>
+
     <div th:if="${logout}"
          style="margin-bottom:12px; color:#2e7d32; font-size:14px;">
         Вы вышли из системы

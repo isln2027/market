@@ -6,9 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
@@ -26,6 +23,10 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfiguration {
+    private static final String[] PUBLIC_PATHS = new String[] {
+            "/", "/login", "/items", "/items/image", "/items/*", "/item", "/static", "/register"
+    };
+
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(
             ServerHttpSecurity http,
@@ -35,7 +36,7 @@ public class SecurityConfiguration {
     ) {
         http.csrf(csrf -> csrf.csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse()))
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/", "/login", "/items", "/items/image", "/items/*", "/item", "/static").permitAll()
+                        .pathMatchers(PUBLIC_PATHS).permitAll()
                         .anyExchange().authenticated()
                 )
                 .formLogin(form -> form
@@ -62,18 +63,9 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public MapReactiveUserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("user")
-                .password(passwordEncoder().encode("password"))
-                .roles("USER")
-                .build();
-        return new MapReactiveUserDetailsService(user);
-    }
-
-    @Bean
     public ServerLogoutSuccessHandler redirectServerLogoutSuccessHandler() {
         RedirectServerLogoutSuccessHandler logoutSuccessHandler = new RedirectServerLogoutSuccessHandler();
-        logoutSuccessHandler.setLogoutSuccessUrl(URI.create("/"));
+        logoutSuccessHandler.setLogoutSuccessUrl(URI.create("/login?logout"));
         return new LoggingServerLogoutSuccessHandler(logoutSuccessHandler);
     }
 
