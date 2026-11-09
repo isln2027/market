@@ -1,4 +1,4 @@
-package org.isln.market.configuration;
+package org.isln.market.configuration.security;
 
 import java.net.URI;
 

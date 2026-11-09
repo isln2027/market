@@ -1,4 +1,4 @@
-package org.isln.market.configuration;
+package org.isln.market.configuration.security;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
