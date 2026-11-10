@@ -16,8 +16,13 @@
                     <h2>
                         <span class="badge text-bg-success">Витрина магазина</span>
                     </h2>
-                    <a href="/orders" class="btn btn-secondary ms-auto bi bi-file-earmark-text"> Заказы</a>
-                    <a href="/cart/items" class="btn btn-secondary bi bi-cart4"> Корзина</a>
+                    <div style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border:2px solid #2e7d32; border-radius:12px; font-family:inherit; font-size:14px;">
+                        <span>Вы зашли как:</span>
+                        <span style="font-weight:600; color:#2e7d32;"
+                              th:text="${currentUser.isAnonymous() ? 'гость' : currentUser.getName()}">гость</span>
+                    </div>
+                    <a th:if="${!currentUser.isAnonymous()}" href="/orders" class="btn btn-secondary ms-auto bi bi-file-earmark-text"> Заказы</a>
+                    <a th:if="${!currentUser.isAnonymous()}" href="/cart/items" class="btn btn-secondary bi bi-cart4"> Корзина</a>
                     <a href="/items" class="btn btn-secondary bi bi-arrow-left-square"> Главная</a>
                 </div>
             </div>
