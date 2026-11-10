@@ -4,6 +4,8 @@ import java.net.URI;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationTrustResolver;
+import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,6 +28,7 @@ public class SecurityConfiguration {
     private static final String[] PUBLIC_PATHS = new String[] {
             "/", "/login", "/items", "/items/image", "/items/*", "/item", "/static", "/register"
     };
+    public static final String GUEST_ROLE = "ROLE_GUEST";
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(
@@ -44,6 +47,9 @@ public class SecurityConfiguration {
                         .authenticationSuccessHandler(authenticationSuccessHandler)
                         .authenticationFailureHandler(authenticationFailureHandler)
                 )
+                .anonymous(anonymous -> anonymous
+                        .principal("guest")
+                        .authorities(GUEST_ROLE))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessHandler(serverLogoutSuccessHandler)
@@ -79,5 +85,10 @@ public class SecurityConfiguration {
         return new LoggingServerAuthenticationFailureHandler(
                 new RedirectServerAuthenticationFailureHandler("/login?error")
         );
+    }
+
+    @Bean
+    public AuthenticationTrustResolver getTrustResolver() {
+        return new AuthenticationTrustResolverImpl();
     }
 }
