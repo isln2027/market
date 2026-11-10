@@ -8,10 +8,15 @@ import reactor.core.publisher.Mono;
 import org.isln.market.controller.request.ItemRequestParameters;
 import org.isln.market.dto.CartAction;
 import org.isln.market.dto.SortType;
+import org.isln.market.dto.UserDto;
 import org.isln.market.model.Cart;
+import org.isln.market.model.CartItem;
 import org.isln.market.model.Item;
 import org.isln.market.model.ItemPage;
+import org.isln.market.model.cache.CachedItem;
+import org.isln.market.model.cache.CachedItemPage;
 import org.isln.market.payment.PaymentService;
+import org.isln.market.repository.CartRepository;
 import org.isln.market.repository.ItemRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Sort;
@@ -22,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ItemService {
     private final ItemRepository itemRepository;
+    private final CartRepository cartRepository;
+    private final UserService userService;
     private final CachedItemDataAccessService cachedItemService;
     private final PaymentService paymentApi;
 
@@ -37,48 +44,80 @@ public class ItemService {
     }
 
     public Mono<ItemPage> find(ItemRequestParameters parameters) {
-        return cachedItemService.find(parameters)
-                .flatMap(
-                        page -> itemRepository.findCountByIdIn(page.getIds())
-                                .collectMap(Item::getId, Item::getCount)
-                                .map(counts -> new ItemPage(page, counts))
-                );
+        return Mono.zip(cachedItemService.find(parameters), userService.getCurrentUser())
+                .flatMap(t -> getItemPage(t.getT1(), t.getT2()));
     }
 
     public Mono<Item> findById(Long id) {
-        return Mono.zip(cachedItemService.findById(id), itemRepository.findCountById(id))
-                .map(t -> new Item(t.getT1(), t.getT2()));
+        return Mono.zip(cachedItemService.findById(id), userService.getCurrentUser())
+                .flatMap(t -> getItem(t.getT1(), t.getT2()));
     }
 
     @Transactional
     public Mono<Item> performAction(Long id, CartAction action) {
-        return findById(id)
+        return userService.getCurrentUser()
+                .flatMap(
+                        user -> cartRepository.findByUserAndItemId(user.getName(), id)
+                                .defaultIfEmpty(new CartItem().setItemId(id).setUser(user.getName()))
+                )
                 .map(item -> {
-                    if (action == CartAction.PLUS) {
-                        item.addToCart();
-                    } else if (action == CartAction.MINUS) {
-                        item.removeFromCart();
-                    } else if (action == CartAction.DELETE) {
-                        item.setCount(0);
-                    } else {
-                        throw new RuntimeException("Unknown action '" + action + "'");
-                    }
+                    performAction(action, item);
                     return item;
                 })
-                .flatMap(itemRepository::save);
+                .flatMap(cartRepository::save)
+                .then(findById(id));
     }
 
     public Mono<Cart> getCart() {
-        return itemRepository.findByCountGreaterThan(0)
+        return userService.getCurrentUser()
+                .map(UserDto::getName)
+                .flatMapMany(cartRepository::findCartItemsByUser)
                 .collectList()
                 .map(Cart::new)
                 .flatMap(
                         c -> paymentApi.canPay(c.getTotalPrice())
                                 .map(c::setCanBuy)
-                                .onErrorResume(e -> Mono.just(c)));
+                                .onErrorResume(e -> Mono.just(c))
+                );
     }
 
     public Mono<Void> cleanupCart() {
-        return itemRepository.saveAll(itemRepository.findAll().map(item -> item.setCount(0))).then();
+        return userService.getCurrentUser().map(UserDto::getName).flatMap(this::cleanupUserCart);
+    }
+
+    private Mono<ItemPage> getItemPage(CachedItemPage page, UserDto user) {
+        if (user.isAnonymous()) {
+            return Mono.just(new ItemPage(page));
+        } else {
+            return cartRepository.findCountByUserAndItemIdIn(user.getName(), page.getIds())
+                    .collectMap(CartItem::getItemId, CartItem::getCount)
+                    .map(counts -> new ItemPage(page, counts));
+        }
+    }
+
+    private Mono<Item> getItem(CachedItem cachedItem, UserDto user) {
+        if (user.isAnonymous()) {
+            return Mono.just(new Item(cachedItem));
+        } else {
+            return cartRepository.findCountByUserAndItemId(user.getName(), cachedItem.getId())
+                    .map(CartItem::getCount)
+                    .map(count -> new Item(cachedItem, count));
+        }
+    }
+
+    private Mono<Void> cleanupUserCart(String login) {
+        return cartRepository.saveAll(cartRepository.findByUser(login).map(item -> item.setCount(0))).then();
+    }
+
+    private static void performAction(CartAction action, CartItem item) {
+        if (action == CartAction.PLUS) {
+            item.addToCart();
+        } else if (action == CartAction.MINUS) {
+            item.removeFromCart();
+        } else if (action == CartAction.DELETE) {
+            item.setCount(0);
+        } else {
+            throw new RuntimeException("Unknown action '" + action + "'");
+        }
     }
 }

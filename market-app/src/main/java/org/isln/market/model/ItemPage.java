@@ -22,12 +22,24 @@ public class ItemPage {
     private Boolean hasNext;
 
     public ItemPage(CachedItemPage page, Map<Long, Integer> counts) {
-        int size = counts.size();
+        List<CachedItem> cachedItems = page.getContent();
+        int size = cachedItems.size();
+        List<Item> items = new ArrayList<>(size);
+        for (CachedItem cachedItem : cachedItems) {
+            items.add(new Item(cachedItem, counts.getOrDefault(cachedItem.getId(), 0)));
+        }
+        this.content = items;
+        this.hasNext = page.getHasNext();
+        this.hasPrevious = page.getHasPrevious();
+    }
+
+    public ItemPage(CachedItemPage page) {
+        int size = page.getContent().size();
         List<Item> items = new ArrayList<>(size);
         List<CachedItem> cachedItems = page.getContent();
         for (int i = 0; i < size; i++) {
             CachedItem cachedItem = cachedItems.get(i);
-            items.add(new Item(cachedItem, counts.get(cachedItem.getId())));
+            items.add(new Item(cachedItem));
         }
         this.content = items;
         this.hasNext = page.getHasNext();

@@ -25,3 +25,12 @@ CREATE TABLE IF NOT EXISTS public.users (
 	login varchar(255) UNIQUE NULL,
 	password varchar(255) NULL
 );
+
+CREATE TABLE IF NOT EXISTS public.cart_items (
+	id bigserial primary key,
+	item_id int8 NOT NULL,
+	user_login varchar(255) NOT NULL,
+	item_count int4 NOT NULL,
+	FOREIGN KEY (user_login) REFERENCES public.users(login),
+	FOREIGN KEY (item_id) REFERENCES public.items(id)
+);
