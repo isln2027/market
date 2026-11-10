@@ -25,8 +25,6 @@ public class ItemPage {
         int size = counts.size();
         List<Item> items = new ArrayList<>(size);
         List<CachedItem> cachedItems = page.getContent();
-        System.out.println(page);
-        System.out.println(page.getContent() + "");
         for (int i = 0; i < size; i++) {
             CachedItem cachedItem = cachedItems.get(i);
             items.add(new Item(cachedItem, counts.get(cachedItem.getId())));
