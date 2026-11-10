@@ -70,7 +70,6 @@ public class Item {
     }
 
     public Item(ItemWithCount item) {
-        System.out.println(item);
         this.id = item.getId();
         this.title = item.getTitle();
         this.description = item.getDescription();
