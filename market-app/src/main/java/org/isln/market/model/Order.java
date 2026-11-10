@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
@@ -17,6 +18,8 @@ import org.springframework.data.relational.core.mapping.Table;
 public class Order {
     @Id
     private Long id;
+    @Column("user_login")
+    private String user;
 
     @Transient
     private List<Item> items;

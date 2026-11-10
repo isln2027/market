@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS public.items (
 	id bigserial primary key,
-	count int4 NULL,
 	price int8 NULL,
 	description varchar(255) NULL,
 	img_path varchar(255) NULL,
@@ -8,7 +7,9 @@ CREATE TABLE IF NOT EXISTS public.items (
 );
 
 CREATE TABLE IF NOT EXISTS public.orders (
-	id bigserial primary key
+	id bigserial primary key,
+	user_login varchar(255),
+	FOREIGN KEY (user_login) REFERENCES public.users(login)
 );
 
 CREATE TABLE IF NOT EXISTS public.order_item_connection (

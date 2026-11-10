@@ -72,6 +72,7 @@ public class ItemService {
         return userService.getCurrentUser()
                 .map(UserDto::getName)
                 .flatMapMany(cartRepository::findCartItemsByUser)
+                .map(Item::new)
                 .collectList()
                 .map(Cart::new)
                 .flatMap(

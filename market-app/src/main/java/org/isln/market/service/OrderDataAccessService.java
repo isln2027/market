@@ -21,9 +21,9 @@ public class OrderDataAccessService {
     private final OrderedItemConnectionRepository connectionRepository;
     private final ItemMapper mapper;
 
-    @Cacheable(value = "orders")
-    public Flux<Order> findAllWithItems() {
-        return orderRepository.findAllWithItems()
+    @Cacheable(value = "orders", key = "#login")
+    public Flux<Order> findAllWithItems(String login) {
+        return orderRepository.findAllWithItems(login)
                 .groupBy(OrderedItem::getOrderId)
                 .flatMap(
                         orderedItems -> orderedItems
