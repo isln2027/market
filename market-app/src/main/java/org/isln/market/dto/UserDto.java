@@ -10,4 +10,8 @@ import lombok.experimental.Accessors;
 public class UserDto {
     private String name;
     private boolean anonymous;
+
+    public static UserDto anonymous() {
+        return new UserDto().setName("guest").setAnonymous(true);
+    }
 }
