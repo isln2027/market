@@ -62,14 +62,6 @@ public class ItemService {
                 .then(findById(id));
     }
 
-    private Mono<Void> removeItemsWithZeroCount(CartItem cart) {
-        if (cart.getCount() > 0) {
-            return cartRepository.save(cart).then();
-        } else {
-            return cartRepository.delete(cart);
-        }
-    }
-
     @Secured(Roles.CLIENT)
     public Mono<Cart> getCart() {
         return userService.getCurrentUser()
@@ -113,6 +105,14 @@ public class ItemService {
 
     private Mono<Void> cleanupUserCart(String login) {
         return cartRepository.saveAll(cartRepository.findByUser(login).map(item -> item.setCount(0))).then();
+    }
+
+    private Mono<Void> removeItemsWithZeroCount(CartItem cart) {
+        if (cart.getCount() > 0) {
+            return cartRepository.save(cart).then();
+        } else {
+            return cartRepository.delete(cart);
+        }
     }
 
     private static void performAction(CartAction action, CartItem item) {
