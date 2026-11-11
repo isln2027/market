@@ -1,13 +1,10 @@
 package org.isln.market.service;
 
-import java.util.Map;
-
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import org.isln.market.controller.request.ItemRequestParameters;
 import org.isln.market.dto.CartAction;
-import org.isln.market.dto.SortType;
 import org.isln.market.dto.UserDto;
 import org.isln.market.model.Cart;
 import org.isln.market.model.CartItem;
@@ -19,7 +16,6 @@ import org.isln.market.payment.PaymentService;
 import org.isln.market.repository.CartRepository;
 import org.isln.market.repository.ItemRepository;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,12 +27,6 @@ public class ItemService {
     private final UserService userService;
     private final CachedItemDataAccessService cachedItemService;
     private final PaymentService paymentApi;
-
-    private static final Map<SortType, Sort> SORT = Map.of(
-            SortType.NO, Sort.unsorted(),
-            SortType.ALPHA, Sort.by(Sort.Order.asc("title")),
-            SortType.PRICE, Sort.by(Sort.Order.asc("price"))
-    );
 
     @CacheEvict(value = {"items"}, allEntries = true)
     public Mono<Item> create(Item item) {
