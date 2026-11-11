@@ -1,6 +1,7 @@
 package org.isln.market.model;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import lombok.Getter;
@@ -35,7 +36,8 @@ public class MarketUser {
         if (rawRoles == null) {
             return Collections.emptySet();
         }
-        return mapper.readValue(rawRoles, new TypeReference<>() {});
+        return mapper.readValue(rawRoles, new TypeReference<>() {
+        });
     }
 
     public MarketUser setRoles(Set<Role> roles) {
@@ -46,11 +48,12 @@ public class MarketUser {
         return this;
     }
 
-    public MarketUser setRoles(Role role) {
+    public MarketUser setRoles(Role... role) {
         if (role == null) {
             this.rawRoles = mapper.writeValueAsString(Collections.emptySet());
+        } else {
+            this.rawRoles = mapper.writeValueAsString(List.of(role));
         }
-        this.rawRoles = mapper.writeValueAsString(Collections.singleton(role));
         return this;
     }
 }

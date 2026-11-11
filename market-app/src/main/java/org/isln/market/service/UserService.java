@@ -32,7 +32,7 @@ public class UserService {
     public Mono<MarketUser> createOrUpdateAdmin(String username, String rawPassword) {
         return userRepository.findByLogin(username)
                 .defaultIfEmpty(new MarketUser().setLogin(username))
-                .map(user -> user.setPassword(passwordEncoder.encode(rawPassword)).setRoles(Role.ADMIN))
+                .map(user -> user.setPassword(passwordEncoder.encode(rawPassword)).setRoles(Role.ADMIN, Role.CLIENT))
                 .flatMap(userRepository::save);
     }
 
