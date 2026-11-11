@@ -1,5 +1,7 @@
 package org.isln.market.service;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,7 +24,7 @@ public class OrderDataAccessService {
     private final ItemMapper mapper;
 
     @Cacheable(value = "orders", key = "#login")
-    public Flux<Order> findAllWithItems(String login) {
+    public Mono<List<Order>> findAllWithItems(String login) {
         return orderRepository.findAllWithItems(login)
                 .groupBy(OrderedItem::getOrderId)
                 .flatMap(
@@ -30,12 +32,13 @@ public class OrderDataAccessService {
                                 .map(mapper::map)
                                 .collectList()
                                 .map(items -> new Order().setId(orderedItems.key()).setItems(items))
-                );
+                )
+                .collectList();
     }
 
     @Cacheable(value = "order", key = "#id")
     public Mono<Order> findByIdWithItems(Long id) {
-        Flux<Item> items =  orderRepository.findOrderedItems(id).map(mapper::map);
+        Flux<Item> items = orderRepository.findOrderedItems(id).map(mapper::map);
         return orderRepository.findById(id)
                 .flatMap(o -> items.collectList().flatMap(list -> Mono.just(o.setItems(list))));
     }

@@ -1,7 +1,8 @@
 package org.isln.market.service;
 
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
@@ -19,10 +20,10 @@ public class OrderService {
     private final PaymentService paymentService;
     private final UserService userService;
 
-    public Flux<Order> findAllWithItems() {
+    public Mono<List<Order>> findAllWithItems() {
         return userService.getCurrentUser().filter(user -> !user.isAnonymous())
                 .map(UserDto::getName)
-                .flatMapMany(orderDataAccessService::findAllWithItems);
+                .flatMap(orderDataAccessService::findAllWithItems);
     }
 
     public Mono<Order> findByIdWithItems(Long id) {

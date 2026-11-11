@@ -4,18 +4,11 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
-import reactor.core.publisher.Flux;
 import tools.jackson.databind.JavaType;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
-
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.isln.market.model.Order;
 import org.isln.market.model.cache.CachedItem;
-import org.isln.market.model.Cart;
-import org.isln.market.model.ItemPage;
 import org.isln.market.model.cache.CachedItemPage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.cache.autoconfigure.RedisCacheManagerBuilderCustomizer;
@@ -79,7 +72,7 @@ public class RedisConfiguration {
 
     @Bean
     public RedisCacheManagerBuilderCustomizer ordersSerializer(JsonMapper jsonMapper) {
-        JavaType orderFlux = jsonMapper.getTypeFactory().constructParametricType(Flux.class, Order.class);
+        JavaType orderFlux = jsonMapper.getTypeFactory().constructParametricType(List.class, Order.class);
         return builder -> builder.withCacheConfiguration(
                 "orders",
                 RedisCacheConfiguration.defaultCacheConfig()
