@@ -3,7 +3,7 @@ package org.isln.market.service;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-import org.isln.market.configuration.security.Role;
+import org.isln.market.configuration.security.Roles;
 import org.isln.market.dto.UserDto;
 import org.isln.market.model.MarketUser;
 import org.isln.market.repository.UserRepository;
@@ -25,14 +25,14 @@ public class UserService {
                 new MarketUser()
                         .setLogin(username)
                         .setPassword(passwordEncoder.encode(rawPassword))
-                        .setRoles(Role.CLIENT)
+                        .setRoles(Roles.CLIENT)
         );
     }
 
     public Mono<MarketUser> createOrUpdateAdmin(String username, String rawPassword) {
         return userRepository.findByLogin(username)
                 .defaultIfEmpty(new MarketUser().setLogin(username))
-                .map(user -> user.setPassword(passwordEncoder.encode(rawPassword)).setRoles(Role.ADMIN, Role.CLIENT))
+                .map(user -> user.setPassword(passwordEncoder.encode(rawPassword)).setRoles(Roles.ADMIN, Roles.CLIENT))
                 .flatMap(userRepository::save);
     }
 

@@ -11,7 +11,6 @@ import lombok.experimental.Accessors;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
 
-import org.isln.market.configuration.security.Role;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Column;
@@ -32,7 +31,7 @@ public class MarketUser {
     @Column("roles")
     private String rawRoles;
 
-    public Set<Role> getRoles() {
+    public Set<String> getRoles() {
         if (rawRoles == null) {
             return Collections.emptySet();
         }
@@ -40,7 +39,7 @@ public class MarketUser {
         });
     }
 
-    public MarketUser setRoles(Set<Role> roles) {
+    public MarketUser setRoles(Set<String> roles) {
         if (roles == null) {
             this.rawRoles = mapper.writeValueAsString(Collections.emptySet());
         }
@@ -48,7 +47,7 @@ public class MarketUser {
         return this;
     }
 
-    public MarketUser setRoles(Role... role) {
+    public MarketUser setRoles(String... role) {
         if (role == null) {
             this.rawRoles = mapper.writeValueAsString(Collections.emptySet());
         } else {

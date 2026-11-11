@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,6 +25,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 public class SecurityConfiguration {
     private static final String[] PUBLIC_PATHS = new String[] {
             "/", "/login", "/items", "/items/image", "/items/*", "/item", "/static", "/register"
@@ -38,7 +40,7 @@ public class SecurityConfiguration {
     ) {
         http.csrf(csrf -> csrf.csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse()))
                 .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/items/management").hasRole(Role.ADMIN.name())
+                        .pathMatchers("/items/management").hasRole(Roles.ADMIN)
                         .pathMatchers(PUBLIC_PATHS).permitAll()
                         .anyExchange().authenticated()
                 )
@@ -49,7 +51,7 @@ public class SecurityConfiguration {
                 )
                 .anonymous(anonymous -> anonymous
                         .principal("guest")
-                        .authorities(Role.GUEST.name()))
+                        .authorities(Roles.GUEST))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessHandler(serverLogoutSuccessHandler)

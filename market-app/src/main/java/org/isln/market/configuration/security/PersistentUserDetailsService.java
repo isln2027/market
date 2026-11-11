@@ -26,7 +26,7 @@ public class PersistentUserDetailsService implements ReactiveUserDetailsService 
     private static UserDetails fromMarketUser(MarketUser user) {
         return User.builder()
                 .password(user.getPassword())
-                .roles(user.getRoles().stream().map(Role::name).toList().toArray(new String[0]))
+                .roles(user.getRoles().toArray(new String[0]))
                 .username(user.getLogin())
                 .build();
     }
