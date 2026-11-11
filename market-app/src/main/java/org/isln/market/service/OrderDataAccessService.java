@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.isln.market.configuration.security.Roles;
 import org.isln.market.model.Item;
 import org.isln.market.model.Order;
 import org.isln.market.model.OrderedItemConnection;
@@ -14,6 +15,7 @@ import org.isln.market.repository.OrderedItemConnectionRepository;
 import org.isln.market.repository.projection.OrderedItem;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,6 +25,7 @@ public class OrderDataAccessService {
     private final OrderedItemConnectionRepository connectionRepository;
     private final ItemMapper mapper;
 
+    @Secured(Roles.CLIENT)
     @Cacheable(value = "orders", key = "#login")
     public Mono<List<Order>> findAllWithItems(String login) {
         return orderRepository.findAllWithItems(login)
@@ -36,6 +39,7 @@ public class OrderDataAccessService {
                 .collectList();
     }
 
+    @Secured(Roles.CLIENT)
     @Cacheable(value = "order", key = "#id")
     public Mono<Order> findByIdWithItems(Long id) {
         Flux<Item> items = orderRepository.findOrderedItems(id).map(mapper::map);
@@ -43,6 +47,7 @@ public class OrderDataAccessService {
                 .flatMap(o -> items.collectList().flatMap(list -> Mono.just(o.setItems(list))));
     }
 
+    @Secured(Roles.CLIENT)
     @CacheEvict(value = "orders", allEntries = true)
     public Mono<Order> save(Order order) {
         return orderRepository.save(order)
