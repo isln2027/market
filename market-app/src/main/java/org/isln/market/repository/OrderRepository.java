@@ -35,7 +35,7 @@ public interface OrderRepository extends ReactiveCrudRepository<Order, Long> {
             FROM orders o
             JOIN order_item_connection oi ON oi.order_id = o.id
             JOIN items i         ON i.id = oi.item_id
-            WHERE o.id = :id AND o.user_login = :login
+            WHERE o.id = :id
             """)
     Flux<OrderedItem> findOrderedItems(Long id);
 }
