@@ -1,7 +1,5 @@
 package org.isln.market.configuration.security;
 
-import java.util.Collections;
-
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -19,12 +17,17 @@ public class PersistentUserDetailsService implements ReactiveUserDetailsService 
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
+
     @Override
     public Mono<UserDetails> findByUsername(String username) {
         return userRepository.findByLogin(username).map(PersistentUserDetailsService::fromMarketUser);
     }
 
-    private static User fromMarketUser(MarketUser user) {
-        return new User(user.getLogin(), user.getPassword(), Collections.emptyList());
+    private static UserDetails fromMarketUser(MarketUser user) {
+        return User.builder()
+                .password(user.getPassword())
+                .roles(user.getRoles().stream().map(Role::name).toList().toArray(new String[0]))
+                .username(user.getLogin())
+                .build();
     }
 }

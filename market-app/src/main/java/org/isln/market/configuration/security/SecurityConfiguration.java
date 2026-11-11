@@ -28,7 +28,6 @@ public class SecurityConfiguration {
     private static final String[] PUBLIC_PATHS = new String[] {
             "/", "/login", "/items", "/items/image", "/items/*", "/item", "/static", "/register"
     };
-    public static final String GUEST_ROLE = "ROLE_GUEST";
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(
@@ -39,6 +38,7 @@ public class SecurityConfiguration {
     ) {
         http.csrf(csrf -> csrf.csrfTokenRepository(CookieServerCsrfTokenRepository.withHttpOnlyFalse()))
                 .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/items/management").hasRole(Role.ADMIN.name())
                         .pathMatchers(PUBLIC_PATHS).permitAll()
                         .anyExchange().authenticated()
                 )
@@ -49,7 +49,7 @@ public class SecurityConfiguration {
                 )
                 .anonymous(anonymous -> anonymous
                         .principal("guest")
-                        .authorities(GUEST_ROLE))
+                        .authorities(Role.GUEST.name()))
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessHandler(serverLogoutSuccessHandler)

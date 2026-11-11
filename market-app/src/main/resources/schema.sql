@@ -23,8 +23,9 @@ CREATE TABLE IF NOT EXISTS public.order_item_connection (
 
 CREATE TABLE IF NOT EXISTS public.users (
 	id bigserial primary key,
-	login varchar(255) UNIQUE NULL,
-	password varchar(255) NULL
+	login varchar(255) UNIQUE NOT NULL,
+	password varchar(255) NOT NULL,
+	roles text
 );
 
 CREATE TABLE IF NOT EXISTS public.cart_items (

@@ -33,7 +33,9 @@ public class AdminService {
             new Item().setTitle("Ilford Pan 400").setDescription("Фотопленка 135").setPrice(1350L).setImgPath("pan400.jpg")
 
     );
+    private static final String ADMIN_LOGIN = "admin";
     private final ItemRepository itemRepository;
+    private final UserService userService;
 
     @EventListener
     public void populate(ApplicationStartedEvent event) {
@@ -47,5 +49,10 @@ public class AdminService {
                 })
                 .doOnError(e -> log.error("Item population failed", e))
                 .subscribe();
+    }
+
+    @EventListener
+    public void createAdminUser(ApplicationStartedEvent event) {
+        userService.createOrUpdateAdmin(ADMIN_LOGIN, "admin").subscribe();
     }
 }
