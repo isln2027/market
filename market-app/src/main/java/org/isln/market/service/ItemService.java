@@ -54,8 +54,16 @@ public class ItemService {
                     performAction(action, item);
                     return item;
                 })
-                .flatMap(cartRepository::save)
+                .flatMap(this::removeItemsWithZeroCount)
                 .then(findById(id));
+    }
+
+    private Mono<Void> removeItemsWithZeroCount(CartItem cart) {
+        if (cart.getCount() > 0) {
+            return cartRepository.save(cart).then();
+        } else {
+            return cartRepository.delete(cart);
+        }
     }
 
     public Mono<Cart> getCart() {
@@ -92,6 +100,7 @@ public class ItemService {
         } else {
             return cartRepository.findCountByUserAndItemId(user.getName(), cachedItem.getId())
                     .map(CartItem::getCount)
+                    .defaultIfEmpty(0)
                     .map(count -> new Item(cachedItem, count));
         }
     }
