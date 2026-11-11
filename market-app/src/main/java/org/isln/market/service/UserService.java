@@ -42,10 +42,13 @@ public class UserService {
 
     public Mono<UserDto> getCurrentUser() {
         return ReactiveSecurityContextHolder.getContext()
-                .map(ctx -> {
-                    Authentication authentication = ctx.getAuthentication();
-                    return fromAuth(authentication);
-                });
+                .map(
+                        ctx -> {
+                            Authentication authentication = ctx.getAuthentication();
+                            return fromAuth(authentication);
+                        }
+                )
+                .defaultIfEmpty(UserDto.anonymous());
     }
 
     private UserDto fromAuth(Authentication auth) {

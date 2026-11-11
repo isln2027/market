@@ -104,7 +104,7 @@ public class ItemService {
     }
 
     private Mono<Void> cleanupUserCart(String login) {
-        return cartRepository.saveAll(cartRepository.findByUser(login).map(item -> item.setCount(0))).then();
+        return cartRepository.deleteAll(cartRepository.findByUser(login)).then();
     }
 
     private Mono<Void> removeItemsWithZeroCount(CartItem cart) {

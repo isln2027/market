@@ -30,7 +30,7 @@ public class OrderService {
                 .flatMap(orderDataAccessService::findAllWithItems);
     }
 
-    @PostAuthorize("hasRole('ADMIN') or #returnObject?.user == authentication.name")
+    @PostAuthorize("returnObject.user == authentication.name")
     public Mono<Order> findByIdWithItems(Long id) {
         return orderDataAccessService.findByIdWithItems(id);
     }

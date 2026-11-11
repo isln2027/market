@@ -3,9 +3,11 @@ package org.isln.market.integration;
 import reactor.core.publisher.Mono;
 
 import org.isln.market.model.Item;
+import org.isln.market.repository.CartRepository;
 import org.isln.market.repository.ItemRepository;
 import org.isln.market.repository.OrderRepository;
 import org.isln.market.repository.OrderedItemConnectionRepository;
+import org.isln.market.repository.UserRepository;
 import org.isln.market.service.CachedItemDataAccessService;
 import org.isln.market.service.ItemService;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +34,10 @@ public class ItemCacheTest {
     private ItemRepository itemRepository;
     @MockitoBean
     private OrderRepository orderRepository;
+    @MockitoBean
+    private UserRepository userRepository;
+    @MockitoBean
+    private CartRepository cartRepository;
     @MockitoBean
     private OrderedItemConnectionRepository orderedItemConnectionRepository;
 

@@ -25,7 +25,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebFluxSecurity
-@EnableReactiveMethodSecurity
+@EnableReactiveMethodSecurity(useAuthorizationManager = true)
 public class SecurityConfiguration {
     private static final String[] PUBLIC_PATHS = new String[] {
             "/", "/login", "/items", "/items/image", "/items/*", "/item", "/static", "/register"
