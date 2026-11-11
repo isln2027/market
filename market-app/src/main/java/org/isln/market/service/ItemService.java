@@ -46,6 +46,7 @@ public class ItemService {
                 .flatMap(t -> getItem(t.getT1(), t.getT2()));
     }
 
+    @Secured(Roles.CLIENT)
     @Transactional
     public Mono<Item> performAction(Long id, CartAction action) {
         return userService.getCurrentUser()
@@ -69,6 +70,7 @@ public class ItemService {
         }
     }
 
+    @Secured(Roles.CLIENT)
     public Mono<Cart> getCart() {
         return userService.getCurrentUser()
                 .map(UserDto::getName)
@@ -83,6 +85,7 @@ public class ItemService {
                 );
     }
 
+    @Secured(Roles.CLIENT)
     public Mono<Void> cleanupCart() {
         return userService.getCurrentUser().map(UserDto::getName).flatMap(this::cleanupUserCart);
     }
