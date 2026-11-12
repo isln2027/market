@@ -6,6 +6,7 @@ import reactor.core.publisher.Mono;
 import org.isln.payment.api.PaymentApi;
 import org.isln.payment.exception.InsufficientFundsException;
 import org.isln.payment.model.MoneyContainer;
+import org.isln.payment.model.User;
 import org.isln.payment.service.PaymentService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,19 +20,21 @@ public class PaymentController implements PaymentApi {
     private final PaymentService paymentService;
 
     @Override
-    public Mono<ResponseEntity<MoneyContainer>> getBalance(ServerWebExchange exchange) {
-        return paymentService.getBalance().map(balance ->
-                ResponseEntity
-                        .ok()
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(new MoneyContainer().amount(balance))
-        );
+    public Mono<ResponseEntity<MoneyContainer>> getBalance(Mono<User> user, ServerWebExchange exchange) {
+        return user.map(User::getUsername)
+                .flatMap(paymentService::getBalance)
+                .map(balance ->
+                        ResponseEntity
+                                .ok()
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .body(new MoneyContainer().amount(balance))
+                );
     }
 
     @Override
     public Mono<ResponseEntity<Void>> pay(Mono<MoneyContainer> moneyContainer, ServerWebExchange exchange) {
         return moneyContainer
-                .flatMap(c -> paymentService.pay(c.getAmount()))
+                .flatMap(c -> paymentService.pay(c.getAmount(), c.getUsername()))
                 .then(Mono.just(ResponseEntity.ok().body(null)));
     }
 

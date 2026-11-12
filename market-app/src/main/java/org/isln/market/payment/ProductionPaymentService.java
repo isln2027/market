@@ -1,5 +1,7 @@
 package org.isln.market.payment;
 
+import java.security.Principal;
+
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -7,10 +9,14 @@ import org.isln.market.client.PaymentApi;
 import org.isln.market.exception.InsufficientFundsException;
 import org.isln.market.exception.PaymentServiceException;
 import org.isln.market.model.MoneyContainer;
+import org.isln.market.model.User;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -21,7 +27,10 @@ public class ProductionPaymentService implements PaymentService {
 
     @Override
     public Mono<Boolean> canPay(long amount) {
-        return paymentApi.getBalance()
+        return ReactiveSecurityContextHolder.getContext()
+                .flatMap(ProductionPaymentService::getAuthentication)
+                .map(Principal::getName)
+                .flatMap(name -> paymentApi.getBalance(user(name)))
                 .map(MoneyContainer::getAmount)
                 .map(balance -> balance >= amount)
                 .onErrorMap(Exception.class, PaymentServiceException::new);
@@ -41,5 +50,20 @@ public class ProductionPaymentService implements PaymentService {
             case HttpStatus.OK -> Mono.empty();
             default -> Mono.error(new IllegalArgumentException("Неизвестный статус ответа: " + code));
         };
+    }
+
+    private static User user(String name) {
+        User user = new User();
+        user.setUsername(name);
+        return user;
+    }
+
+    private static Mono<Authentication> getAuthentication(SecurityContext ctx) {
+        var auth = ctx.getAuthentication();
+        if (auth == null) {
+            return Mono.empty();
+        } else {
+            return Mono.just(auth);
+        }
     }
 }

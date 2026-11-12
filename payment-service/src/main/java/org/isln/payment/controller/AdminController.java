@@ -6,9 +6,9 @@ import reactor.core.publisher.Mono;
 import org.isln.payment.service.AdminService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.result.view.Rendering;
 
@@ -20,15 +20,15 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public class AdminController {
     private final AdminService adminService;
 
-    @GetMapping
-    public Mono<Rendering> showBalance() {
-        return adminService.getBalance()
+    @PostMapping()
+    public Mono<Rendering> showBalance(@ModelAttribute String username) {
+        return adminService.getBalance(username)
                 .map(balance -> Rendering.view("balance").modelAttribute("balance", balance).build());
     }
 
-    @PostMapping
+    @PutMapping()
     public Mono<Rendering> updateBalance(@ModelAttribute BalanceUpdateRequest balanceUpdateRequest) {
-        return adminService.setBalance(balanceUpdateRequest.getBalance())
+        return adminService.setBalance(balanceUpdateRequest.getBalance(), balanceUpdateRequest.getUsername())
                 .then(Mono.just(Rendering.redirectTo("/admin/balance").build()));
     }
 

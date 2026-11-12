@@ -1,11 +1,15 @@
 package org.isln.payment.integration;
 
+import java.util.Map;
+
 import org.isln.payment.controller.AdminController;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,30 +25,61 @@ public class AdminControllerTest {
     @Test
     public void balanceIsUpdatedTest() {
         long balance = 12345L;
-
-        webTestClient.post()
+        String user = "user";
+        webTestClient.put()
                 .uri("/admin/balance")
-                .body(BodyInserters.fromFormData("balance", Long.toString(balance)))
+                .body(withBalance(balance, user))
                 .exchange()
                 .returnResult();
 
-        Long newBalance = (Long) adminController.showBalance().block().modelAttributes().get("balance");
+        Long newBalance = (Long) adminController.showBalance(user).block().modelAttributes().get("balance");
+        assertThat(newBalance).isEqualTo(balance);
+    }
+
+    @Test
+    public void balanceForUserIsUpdatedTest() {
+        long balance = 12345L;
+        String user = "user";
+        webTestClient.put()
+                .uri("/admin/balance")
+                .body(withBalance(balance, user))
+                .exchange()
+                .returnResult();
+        webTestClient.put()
+                .uri("/admin/balance")
+                .body(withBalance(10, "another"))
+                .exchange()
+                .returnResult();
+
+        Long newBalance = (Long) adminController.showBalance(user).block().modelAttributes().get("balance");
         assertThat(newBalance).isEqualTo(balance);
     }
 
     @Test
     public void balanceIsNotUpdatedOnInvalidInputTest() {
         long balance = -12345L;
-        Long oldBalance = (Long) adminController.showBalance().block().modelAttributes().get("balance");
+        String user = "user";
+        Long oldBalance = (Long) adminController.showBalance(user).block().modelAttributes().get("balance");
 
-        webTestClient.post()
+        webTestClient.put()
                 .uri("/admin/balance")
-                .body(BodyInserters.fromFormData("balance", Long.toString(balance)))
+                .body(withBalance(balance, user))
                 .exchange()
                 .expectStatus()
                 .isBadRequest();
 
-        Long newBalance = (Long) adminController.showBalance().block().modelAttributes().get("balance");
+        Long newBalance = (Long) adminController.showBalance(user).block().modelAttributes().get("balance");
         assertThat(newBalance).isEqualTo(oldBalance);
+    }
+
+    private static BodyInserters.@NotNull FormInserter<String> withBalance(long balance, String user) {
+        return BodyInserters.fromFormData(
+                MultiValueMap.fromSingleValue(
+                        Map.of(
+                                "balance", Long.toString(balance),
+                                "username", user
+                        )
+                )
+        );
     }
 }

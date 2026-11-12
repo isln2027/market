@@ -9,4 +9,5 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class BalanceUpdateRequest {
     private Long balance;
+    private String username;
 }
