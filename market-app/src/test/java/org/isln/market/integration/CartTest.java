@@ -60,12 +60,8 @@ public class CartTest {
                         itemRepository.save(items.get(1)),
                         itemRepository.save(items.get(2))
                 )
-                .flatMap(
-                        t -> Mono.zip(
-                                cartController.performAction(new CartActionRequest(t.getT1().id(), CartAction.PLUS)),
-                                cartController.performAction(new CartActionRequest(t.getT1().id(), CartAction.PLUS))
-                        )
-                )
+                .flatMap(t -> cartController.performAction(new CartActionRequest(t.getT1().id(), CartAction.PLUS)).thenReturn(t))
+                .flatMap(t -> cartController.performAction(new CartActionRequest(t.getT2().id(), CartAction.PLUS)))
                 .then();
 
         Rendering rendering = prepare.then(cartController.getCart()).block();
