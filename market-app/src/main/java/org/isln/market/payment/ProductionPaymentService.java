@@ -3,6 +3,7 @@ package org.isln.market.payment;
 import java.security.Principal;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 import org.isln.market.client.PaymentApi;
@@ -19,6 +20,7 @@ import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @Profile("production")
 @RequiredArgsConstructor
@@ -27,10 +29,16 @@ public class ProductionPaymentService implements PaymentService {
 
     @Override
     public Mono<Boolean> canPay(long amount) {
+        ReactiveSecurityContextHolder.getContext()
+                .flatMap(ProductionPaymentService::getAuthentication)
+                .map(Principal::getName).subscribe(System.out::println);
         return ReactiveSecurityContextHolder.getContext()
                 .flatMap(ProductionPaymentService::getAuthentication)
                 .map(Principal::getName)
+                .doOnNext(user -> log.info("Checking <{}> balance", user))
                 .flatMap(name -> paymentApi.getBalance(user(name)))
+                .doOnNext(mc -> log.info("Balance of <{}> received", mc.getUsername()))
+                .doOnError(th -> log.info("Checking balance error", th))
                 .map(MoneyContainer::getAmount)
                 .map(balance -> balance >= amount)
                 .onErrorMap(Exception.class, PaymentServiceException::new);
@@ -38,7 +46,12 @@ public class ProductionPaymentService implements PaymentService {
 
     @Override
     public Mono<Void> pay(long amount) {
-        return paymentApi.payWithHttpInfo(new MoneyContainer().amount(amount))
+        return ReactiveSecurityContextHolder.getContext()
+                .flatMap(ProductionPaymentService::getAuthentication)
+                .map(Principal::getName)
+                .doOnNext(user -> log.info("Paying for <{}> order", user))
+                .flatMap(name -> paymentApi.payWithHttpInfo(new MoneyContainer().amount(amount).username(name)))
+                .doOnError(th -> log.info("Payment error", th))
                 .map(ResponseEntity::getStatusCode)
                 .flatMap(this::resolveCode)
                 .onErrorMap(Exception.class, PaymentServiceException::new);

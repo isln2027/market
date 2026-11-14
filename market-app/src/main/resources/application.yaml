@@ -16,13 +16,13 @@ spring:
         registration:
           keycloak:
             provider: keycloak
-            client-id: frontend-service
-            client-secret: C60oWwz1kYBhtY0LOhC1SFt8gzeAnMQH
+            client-id: market-app
+            client-secret: ${KC_SECRET:vCwgAvS3yzo1lLfaRbkkZoTOXy2Ky2qk}
             authorization-grant-type: client_credentials
             scope: openid
         provider:
           keycloak:
-            issuer-uri: http://localhost:8180/realms/market
+            issuer-uri: http://${KC_HOST:localhost}:${KC_PORT:8180}/realms/market
   r2dbc:
     url: r2dbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:market}
     username: ${DB_USER:postgres}

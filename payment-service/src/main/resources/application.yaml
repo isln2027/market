@@ -1,2 +1,9 @@
 server:
   port : ${PAYMENT_PORT:8081}
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://${KC_HOST:localhost}:${KC_PORT:8180}/realms/market
