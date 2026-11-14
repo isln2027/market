@@ -5,6 +5,7 @@ import reactor.core.publisher.Mono;
 
 import org.isln.payment.api.PaymentApi;
 import org.isln.payment.exception.InsufficientFundsException;
+import org.isln.payment.exception.UserNotFoundException;
 import org.isln.payment.model.MoneyContainer;
 import org.isln.payment.model.User;
 import org.isln.payment.service.PaymentService;
@@ -18,7 +19,6 @@ import org.springframework.web.server.ServerWebExchange;
 @RequiredArgsConstructor
 public class PaymentController implements PaymentApi {
     private final PaymentService paymentService;
-
     @Override
     public Mono<ResponseEntity<MoneyContainer>> getBalance(Mono<User> user, ServerWebExchange exchange) {
         return user.map(User::getUsername)
@@ -41,5 +41,10 @@ public class PaymentController implements PaymentApi {
     @ExceptionHandler(InsufficientFundsException.class)
     public ResponseEntity<Void> handleInsufficientFunds(InsufficientFundsException e) {
         return ResponseEntity.unprocessableContent().build();
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Void> handleUserNotFound(UserNotFoundException e) {
+        return ResponseEntity.notFound().build();
     }
 }
