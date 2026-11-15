@@ -16,9 +16,12 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.endpoint.WebClientReactiveAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
+import org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
@@ -38,6 +41,7 @@ public class SecurityConfiguration {
     private static final String[] PUBLIC_PATHS = new String[]{
             "/", "/login", "/items", "/items/image", "/items/*", "/item", "/static", "/register"
     };
+    public static final String LOGOUT_REDIRECT = "/login?logout";
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(
@@ -83,10 +87,20 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public ServerLogoutSuccessHandler redirectServerLogoutSuccessHandler() {
-        RedirectServerLogoutSuccessHandler logoutSuccessHandler = new RedirectServerLogoutSuccessHandler();
-        logoutSuccessHandler.setLogoutSuccessUrl(URI.create("/login?logout"));
-        return new LoggingServerLogoutSuccessHandler(logoutSuccessHandler);
+    public ServerLogoutSuccessHandler redirectServerLogoutSuccessHandler(ReactiveClientRegistrationRepository clientRegistrationRepository) {
+        RedirectServerLogoutSuccessHandler basicLogoutHandler = new RedirectServerLogoutSuccessHandler();
+        basicLogoutHandler.setLogoutSuccessUrl(URI.create(LOGOUT_REDIRECT));
+        OidcClientInitiatedServerLogoutSuccessHandler oidcLogoutHandler =
+                new OidcClientInitiatedServerLogoutSuccessHandler(clientRegistrationRepository);
+        oidcLogoutHandler.setPostLogoutRedirectUri("{baseUrl}/login?logout");
+        ServerLogoutSuccessHandler delegatingHandler = (exchange, auth) -> {
+            if (auth instanceof OAuth2AuthenticationToken) {
+                return oidcLogoutHandler.onLogoutSuccess(exchange, auth);
+            } else {
+                return basicLogoutHandler.onLogoutSuccess(exchange, auth);
+            }
+        };
+        return new LoggingServerLogoutSuccessHandler(delegatingHandler);
     }
 
     @Bean

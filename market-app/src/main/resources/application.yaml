@@ -1,3 +1,6 @@
+server:
+  port : ${MARKET_PORT:8080}
+
 application:
   upload:
     path: market-app/uploads
