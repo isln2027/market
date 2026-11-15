@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.server.WebFilterExchange;
 import org.springframework.security.web.server.authentication.logout.ServerLogoutSuccessHandler;
+
 @Slf4j
 @RequiredArgsConstructor
 public class LoggingServerLogoutSuccessHandler implements ServerLogoutSuccessHandler {
