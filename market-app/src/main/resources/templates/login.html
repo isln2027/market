@@ -26,18 +26,22 @@
     </div>
 
     <form th:action="@{/login}" method="post" style="display:flex; flex-direction:column; gap:12px;">
-
         <input type="text" name="username" placeholder="Имя пользователя" required autofocus
                style="padding:10px 12px; border:2px solid #2e7d32; border-radius:8px; font-family:inherit; font-size:14px; color:#000; background:#fff; outline:none;"/>
 
         <input type="password" name="password" placeholder="Пароль" required
                style="padding:10px 12px; border:2px solid #2e7d32; border-radius:8px; font-family:inherit; font-size:14px; color:#000; background:#fff; outline:none;"/>
-
         <button type="submit"
-                style="padding:10px 12px; border:2px solid #2e7d32; border-radius:8px; background:#2e7d32; color:#fff; font-family:inherit; font-size:14px; cursor:pointer;">
+                style="padding:10px 12px; margin-bottom:12px; border:2px solid #2e7d32; border-radius:8px; background:#2e7d32; color:#fff; font-family:inherit; font-size:14px; cursor:pointer;">
             Войти
         </button>
+    </form>
 
+    <form th:action="@{/oauth2/authorization/keycloak-login}" method="get" style="display:flex; flex-direction:column; gap:12px;">
+        <button type="submit"
+                style="padding:10px 12px; border:2px solid #101010; border-radius:8px; background:#dddddd; color:#000000; font-family:inherit; font-size:14px; cursor:pointer;">
+            Войти через keycloak
+        </button>
     </form>
 
 </div>

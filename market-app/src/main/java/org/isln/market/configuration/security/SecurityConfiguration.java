@@ -2,15 +2,21 @@ package org.isln.market.configuration.security;
 
 import java.net.URI;
 
+import org.isln.market.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.endpoint.WebClientReactiveAuthorizationCodeTokenResponseClient;
+import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
+import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
@@ -27,7 +33,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableWebFluxSecurity
 @EnableReactiveMethodSecurity
 public class SecurityConfiguration {
-    private static final String[] PUBLIC_PATHS = new String[] {
+    private static final String[] PUBLIC_PATHS = new String[]{
             "/", "/login", "/items", "/items/image", "/items/*", "/item", "/static", "/register"
     };
 
@@ -35,6 +41,7 @@ public class SecurityConfiguration {
     public SecurityWebFilterChain springSecurityFilterChain(
             ServerHttpSecurity http,
             ServerLogoutSuccessHandler serverLogoutSuccessHandler,
+            ReactiveAuthenticationManager authenticationManager,
             ServerAuthenticationSuccessHandler authenticationSuccessHandler,
             ServerAuthenticationFailureHandler authenticationFailureHandler
     ) {
@@ -48,6 +55,10 @@ public class SecurityConfiguration {
                         .loginPage("/login")
                         .authenticationSuccessHandler(authenticationSuccessHandler)
                         .authenticationFailureHandler(authenticationFailureHandler)
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .authenticationManager(authenticationManager)
                 )
                 .anonymous(anonymous -> anonymous
                         .principal("guest")
@@ -92,5 +103,23 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationTrustResolver getTrustResolver() {
         return new AuthenticationTrustResolverImpl();
+    }
+
+    @Bean
+    public OAuthUserService oAuthUserService(UserService userService) {
+        return new OAuthUserService(new OidcReactiveOAuth2UserService(), userService);
+    }
+
+    @Bean
+    public ReactiveAuthenticationManager oauth2LoginAuthenticationManager(
+            ReactiveClientRegistrationRepository clientRegistrations,
+            WebClientReactiveAuthorizationCodeTokenResponseClient responseClient,
+            OAuthUserService userService) {
+        return new OidcAuthorizationCodeReactiveAuthenticationManager(responseClient, userService);
+    }
+
+    @Bean
+    public WebClientReactiveAuthorizationCodeTokenResponseClient responseClient() {
+        return new WebClientReactiveAuthorizationCodeTokenResponseClient();
     }
 }

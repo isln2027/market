@@ -3,7 +3,6 @@ package org.isln.market.service;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
-import org.isln.market.configuration.security.Roles;
 import org.isln.market.controller.request.ItemRequestParameters;
 import org.isln.market.dto.CartAction;
 import org.isln.market.dto.UserDto;
@@ -17,7 +16,7 @@ import org.isln.market.payment.PaymentService;
 import org.isln.market.repository.CartRepository;
 import org.isln.market.repository.ItemRepository;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,7 +29,7 @@ public class ItemService {
     private final CachedItemDataAccessService cachedItemService;
     private final PaymentService paymentApi;
 
-    @Secured(Roles.ADMIN)
+    @PreAuthorize("hasRole('ADMIN')")
     @CacheEvict(value = {"items"}, allEntries = true)
     public Mono<Item> create(Item item) {
         return itemRepository.save(item);
@@ -46,7 +45,7 @@ public class ItemService {
                 .flatMap(t -> getItem(t.getT1(), t.getT2()));
     }
 
-    @Secured(Roles.CLIENT)
+    @PreAuthorize("hasRole('CLIENT')")
     @Transactional
     public Mono<Item> performAction(Long id, CartAction action) {
         return userService.getCurrentUser()
@@ -62,7 +61,7 @@ public class ItemService {
                 .then(findById(id));
     }
 
-    @Secured(Roles.CLIENT)
+    @PreAuthorize("hasRole('CLIENT')")
     public Mono<Cart> getCart() {
         return userService.getCurrentUser()
                 .map(UserDto::getName)
@@ -77,7 +76,7 @@ public class ItemService {
                 );
     }
 
-    @Secured(Roles.CLIENT)
+    @PreAuthorize("hasRole('CLIENT')")
     public Mono<Void> cleanupCart() {
         return userService.getCurrentUser().map(UserDto::getName).flatMap(this::cleanupUserCart);
     }
