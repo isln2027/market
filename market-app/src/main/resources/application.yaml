@@ -23,13 +23,6 @@ spring:
             client-secret: ${KC_SECRET:vCwgAvS3yzo1lLfaRbkkZoTOXy2Ky2qk}
             authorization-grant-type: client_credentials
             scope: openid
-          keycloak-login:
-            provider: keycloak
-            client-id: o2-user
-            client-secret: ${KC_LOGIN_SECRET:b30VFgGCnHb03JA4GYLDIN5eDLjwlZ3T}
-            scope: openid, profile, email
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
         provider:
           keycloak:
             issuer-uri: http://${KC_HOST:localhost}:${KC_PORT:8180}/realms/market

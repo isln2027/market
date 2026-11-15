@@ -15,7 +15,6 @@ services:
       KC_HOST: ${KC_HOST}
       KC_PORT: ${KC_PORT}
       KC_SECRET: ${KC_SECRET}
-      KC_LOGIN_SECRET: ${KC_LOGIN_SECRET}
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}

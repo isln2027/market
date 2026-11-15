@@ -2,25 +2,15 @@ package org.isln.market.configuration.security;
 
 import java.net.URI;
 
-import org.isln.market.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
-import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.client.endpoint.WebClientReactiveAuthorizationCodeTokenResponseClient;
-import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager;
-import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
-import org.springframework.security.oauth2.client.oidc.web.server.logout.OidcClientInitiatedServerLogoutSuccessHandler;
 import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
@@ -41,7 +31,6 @@ public class SecurityConfiguration {
     private static final String[] PUBLIC_PATHS = new String[]{
             "/", "/login", "/items", "/items/image", "/items/*", "/item", "/static", "/register"
     };
-    public static final String LOGOUT_REDIRECT = "/login?logout";
 
     @Bean
     public SecurityWebFilterChain springSecurityFilterChain(
@@ -89,18 +78,8 @@ public class SecurityConfiguration {
     @Bean
     public ServerLogoutSuccessHandler redirectServerLogoutSuccessHandler(ReactiveClientRegistrationRepository clientRegistrationRepository) {
         RedirectServerLogoutSuccessHandler basicLogoutHandler = new RedirectServerLogoutSuccessHandler();
-        basicLogoutHandler.setLogoutSuccessUrl(URI.create(LOGOUT_REDIRECT));
-        OidcClientInitiatedServerLogoutSuccessHandler oidcLogoutHandler =
-                new OidcClientInitiatedServerLogoutSuccessHandler(clientRegistrationRepository);
-        oidcLogoutHandler.setPostLogoutRedirectUri("{baseUrl}/login?logout");
-        ServerLogoutSuccessHandler delegatingHandler = (exchange, auth) -> {
-            if (auth instanceof OAuth2AuthenticationToken) {
-                return oidcLogoutHandler.onLogoutSuccess(exchange, auth);
-            } else {
-                return basicLogoutHandler.onLogoutSuccess(exchange, auth);
-            }
-        };
-        return new LoggingServerLogoutSuccessHandler(delegatingHandler);
+        basicLogoutHandler.setLogoutSuccessUrl(URI.create("/login?logout"));
+        return basicLogoutHandler;
     }
 
     @Bean
@@ -118,32 +97,5 @@ public class SecurityConfiguration {
     @Bean
     public AuthenticationTrustResolver getTrustResolver() {
         return new AuthenticationTrustResolverImpl();
-    }
-
-    @Bean
-    public OAuthUserService oAuthUserService(UserService userService) {
-        return new OAuthUserService(new OidcReactiveOAuth2UserService(), userService);
-    }
-
-    @Bean
-    public ReactiveAuthenticationManager authenticationManager(
-            WebClientReactiveAuthorizationCodeTokenResponseClient responseClient,
-            OAuthUserService userService,
-            ReactiveUserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) {
-        UserDetailsRepositoryReactiveAuthenticationManager formManager =
-                new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
-        formManager.setPasswordEncoder(passwordEncoder);
-        OidcAuthorizationCodeReactiveAuthenticationManager oauthManager =
-                new OidcAuthorizationCodeReactiveAuthenticationManager(responseClient, userService);
-        return new DelegatingReactiveAuthenticationManager(
-                formManager,
-                oauthManager
-        );
-    }
-
-    @Bean
-    public WebClientReactiveAuthorizationCodeTokenResponseClient responseClient() {
-        return new WebClientReactiveAuthorizationCodeTokenResponseClient();
     }
 }
