@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.isln.payment.controller.AdminController;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,11 +23,20 @@ public class AdminControllerTest {
     @Autowired
     private AdminController adminController;
 
+    @BeforeEach
+    void setUp() {
+        webTestClient.post()
+                .uri("/admin/user")
+                .body(user())
+                .exchange()
+                .returnResult();
+    }
+
     @Test
     public void balanceIsUpdatedTest() {
         long balance = 12345L;
         String user = "user";
-        webTestClient.put()
+        webTestClient.post()
                 .uri("/admin/balance")
                 .body(withBalance(balance, user))
                 .exchange()
@@ -40,7 +50,7 @@ public class AdminControllerTest {
     public void balanceForUserIsUpdatedTest() {
         long balance = 12345L;
         String user = "user";
-        webTestClient.put()
+        webTestClient.post()
                 .uri("/admin/balance")
                 .body(withBalance(balance, user))
                 .exchange()
@@ -61,7 +71,7 @@ public class AdminControllerTest {
         String user = "user";
         Long oldBalance = (Long) adminController.showBalance(user).block().modelAttributes().get("balance");
 
-        webTestClient.put()
+        webTestClient.post()
                 .uri("/admin/balance")
                 .body(withBalance(balance, user))
                 .exchange()
@@ -81,5 +91,9 @@ public class AdminControllerTest {
                         )
                 )
         );
+    }
+
+    private static BodyInserters.@NotNull FormInserter<String> user() {
+        return BodyInserters.fromFormData(MultiValueMap.fromSingleValue(Map.of("username", "user")));
     }
 }
