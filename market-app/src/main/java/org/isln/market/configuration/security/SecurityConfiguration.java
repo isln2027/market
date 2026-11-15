@@ -7,16 +7,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationTrustResolver;
 import org.springframework.security.authentication.AuthenticationTrustResolverImpl;
+import org.springframework.security.authentication.DelegatingReactiveAuthenticationManager;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.endpoint.WebClientReactiveAuthorizationCodeTokenResponseClient;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcAuthorizationCodeReactiveAuthenticationManager;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcReactiveOAuth2UserService;
-import org.springframework.security.oauth2.client.registration.ReactiveClientRegistrationRepository;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
 import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
@@ -41,7 +43,6 @@ public class SecurityConfiguration {
     public SecurityWebFilterChain springSecurityFilterChain(
             ServerHttpSecurity http,
             ServerLogoutSuccessHandler serverLogoutSuccessHandler,
-            ReactiveAuthenticationManager authenticationManager,
             ServerAuthenticationSuccessHandler authenticationSuccessHandler,
             ServerAuthenticationFailureHandler authenticationFailureHandler
     ) {
@@ -58,7 +59,6 @@ public class SecurityConfiguration {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .loginPage("/login")
-                        .authenticationManager(authenticationManager)
                 )
                 .anonymous(anonymous -> anonymous
                         .principal("guest")
@@ -66,6 +66,7 @@ public class SecurityConfiguration {
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessHandler(serverLogoutSuccessHandler)
+
                 )
                 .oauth2Client(withDefaults());
         return http.build();
@@ -111,11 +112,20 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public ReactiveAuthenticationManager oauth2LoginAuthenticationManager(
-            ReactiveClientRegistrationRepository clientRegistrations,
+    public ReactiveAuthenticationManager authenticationManager(
             WebClientReactiveAuthorizationCodeTokenResponseClient responseClient,
-            OAuthUserService userService) {
-        return new OidcAuthorizationCodeReactiveAuthenticationManager(responseClient, userService);
+            OAuthUserService userService,
+            ReactiveUserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        UserDetailsRepositoryReactiveAuthenticationManager formManager =
+                new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
+        formManager.setPasswordEncoder(passwordEncoder);
+        OidcAuthorizationCodeReactiveAuthenticationManager oauthManager =
+                new OidcAuthorizationCodeReactiveAuthenticationManager(responseClient, userService);
+        return new DelegatingReactiveAuthenticationManager(
+                formManager,
+                oauthManager
+        );
     }
 
     @Bean
