@@ -29,9 +29,6 @@ public class ProductionPaymentService implements PaymentService {
 
     @Override
     public Mono<Boolean> canPay(long amount) {
-        ReactiveSecurityContextHolder.getContext()
-                .flatMap(ProductionPaymentService::getAuthentication)
-                .map(Principal::getName).subscribe(System.out::println);
         return ReactiveSecurityContextHolder.getContext()
                 .flatMap(ProductionPaymentService::getAuthentication)
                 .map(Principal::getName)
