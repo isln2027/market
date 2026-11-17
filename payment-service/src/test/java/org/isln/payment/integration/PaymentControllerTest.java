@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.reactive.server.SecurityMockServerConfigurers;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.MultiValueMap;
@@ -33,6 +34,7 @@ public class PaymentControllerTest {
     private ApplicationContext context;
 
     @BeforeEach
+    @WithMockUser(value = "admin", authorities = "ADMIN")
     void setUp() {
         this.webTestClient = WebTestClient
                 .bindToApplicationContext(context)
@@ -47,6 +49,7 @@ public class PaymentControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", authorities = "ADMIN")
     public void getBalanceTest() {
         long balance = 10;
         webTestClient.post()
@@ -70,6 +73,7 @@ public class PaymentControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", authorities = "ADMIN")
     public void amountIsPayedTest() {
         long balance = 10;
         webTestClient.post()
@@ -101,6 +105,7 @@ public class PaymentControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", authorities = "ADMIN")
     public void amountIsNotPayedIfInsufficientFundsTest() {
         long balance = 10;
         webTestClient.post()
