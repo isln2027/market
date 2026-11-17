@@ -13,9 +13,18 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.MapReactiveUserDetailsService;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationFailureHandler;
+import org.springframework.security.web.server.authentication.RedirectServerAuthenticationSuccessHandler;
+import org.springframework.security.web.server.authentication.ServerAuthenticationSuccessHandler;
+import org.springframework.security.web.server.csrf.WebSessionServerCsrfTokenRepository;
 
 @Slf4j
 @Configuration
@@ -25,11 +34,15 @@ public class SecurityConfiguration {
     public SecurityWebFilterChain springSecurityFilterChain(
             ServerHttpSecurity http,
             ReactiveJwtAuthenticationConverter converter) {
-        http
-                .authorizeExchange(
+        http.authorizeExchange(
                         exchanges -> exchanges
-                                .pathMatchers("/admin/**").permitAll()
+                                .pathMatchers("/login").permitAll()
+                                .pathMatchers("/admin/**").hasAuthority("ADMIN")
                                 .anyExchange().hasAuthority("MARKET_APP")
+                )
+                .formLogin(form -> form.loginPage("/login")
+                        .authenticationSuccessHandler(new RedirectServerAuthenticationSuccessHandler("/admin"))
+                        .authenticationFailureHandler(new RedirectServerAuthenticationFailureHandler("/login?error"))
                 )
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .oauth2ResourceServer(
@@ -37,6 +50,31 @@ public class SecurityConfiguration {
                 );
         return http.build();
     }
+
+    @Bean
+    public MapReactiveUserDetailsService userDetailsService(PasswordEncoder encoder) {
+        UserDetails user = User.withUsername("admin")
+                .password(encoder.encode("admin"))
+                .authorities("ADMIN")
+                .build();
+        return new MapReactiveUserDetailsService(user);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public WebSessionServerCsrfTokenRepository csrfTokenRepository() {
+        return new WebSessionServerCsrfTokenRepository();
+    }
+
+    @Bean
+    public ServerAuthenticationSuccessHandler redirectServerLoginSuccessHandler() {
+        return new RedirectServerAuthenticationSuccessHandler("/admin");
+    }
+
 
     @Bean
     public ReactiveJwtAuthenticationConverter authenticationConverter(Converter<Jwt, Flux<GrantedAuthority>> authorityConverter) {
