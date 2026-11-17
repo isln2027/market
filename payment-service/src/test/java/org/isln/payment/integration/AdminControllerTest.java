@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTestClient;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -24,6 +25,7 @@ public class AdminControllerTest {
     private AdminController adminController;
 
     @BeforeEach
+    @WithMockUser(value = "admin", authorities = "ADMIN")
     void setUp() {
         webTestClient.post()
                 .uri("/admin/user")
@@ -33,6 +35,7 @@ public class AdminControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", authorities = "ADMIN")
     public void balanceIsUpdatedTest() {
         long balance = 12345L;
         String user = "user";
@@ -47,6 +50,7 @@ public class AdminControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", authorities = "ADMIN")
     public void balanceForUserIsUpdatedTest() {
         long balance = 12345L;
         String user = "user";
@@ -66,6 +70,7 @@ public class AdminControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "admin", authorities = "ADMIN")
     public void balanceIsNotUpdatedOnInvalidInputTest() {
         long balance = -12345L;
         String user = "user";
