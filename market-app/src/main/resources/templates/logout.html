@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Выход</title>
+</head>
+<body style="margin:0; height:100vh; display:flex; align-items:center; justify-content:center; background:#fff; color:#000; font-family:sans-serif;">
+
+<div style="padding:24px 32px; border:2px solid #2e7d32; border-radius:12px; text-align:center; min-width:280px;">
+
+    <div style="margin-bottom:16px; color:#2e7d32; font-size:16px;">
+        Вы вышли из системы
+    </div>
+
+    <a th:href="@{/}"
+       style="display:inline-block; padding:10px 24px; border:2px solid #2e7d32; border-radius:8px; background:#2e7d32; color:#fff; font-family:inherit; font-size:14px; text-decoration:none; cursor:pointer;">
+        На главную
+    </a>
+
+</div>
+
+</body>
+</html>

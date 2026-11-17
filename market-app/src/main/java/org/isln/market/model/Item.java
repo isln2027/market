@@ -6,7 +6,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import org.isln.market.model.cache.CachedItem;
+import org.isln.market.repository.projection.ItemWithCount;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.relational.core.mapping.Table;
 
 
@@ -22,17 +24,9 @@ public class Item {
     private String description;
     private String imgPath;
     private Long price;
-    private Integer count = 0;
 
-    public void addToCart() {
-        count++;
-    }
-
-    public void removeFromCart() {
-        if (count > 0) {
-            count--;
-        }
-    }
+    @Transient
+    private Integer count;
 
     public Long id() {
         return id;
@@ -65,6 +59,23 @@ public class Item {
         this.imgPath = item.getImgPath();
         this.price = item.getPrice();
         this.count = count;
+    }
+
+    public Item(CachedItem item) {
+        this.id = item.getId();
+        this.title = item.getTitle();
+        this.description = item.getDescription();
+        this.imgPath = item.getImgPath();
+        this.price = item.getPrice();
+    }
+
+    public Item(ItemWithCount item) {
+        this.id = item.getId();
+        this.title = item.getTitle();
+        this.description = item.getDescription();
+        this.imgPath = item.getImgPath();
+        this.price = item.getPrice();
+        this.count = item.getItemCount();
     }
 }
 

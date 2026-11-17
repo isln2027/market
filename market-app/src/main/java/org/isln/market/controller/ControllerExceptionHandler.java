@@ -1,5 +1,7 @@
 package org.isln.market.controller;
 
+import java.nio.file.AccessDeniedException;
+
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -12,6 +14,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @Slf4j
 @ControllerAdvice
 public class ControllerExceptionHandler {
+    @ExceptionHandler(AccessDeniedException.class)
+    public Mono<String> handle(AccessDeniedException error, Model model) {
+        log.warn("Error handled in a controller: ", error);
+        String message = error.getMessage();
+        model.addAttribute("message", message == null ? "Нет доступа" : message);
+        return Mono.just("error");
+    }
+
     @ExceptionHandler(InsufficientFundsException.class)
     public Mono<String> handle(InsufficientFundsException error, Model model) {
         log.warn("Error handled in a controller: ", error);
@@ -23,7 +33,6 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(PaymentServiceException.class)
     public Mono<String> handle(PaymentServiceException error, Model model) {
         log.warn("Error handled in a controller: ", error);
-        String message = error.getMessage();
         model.addAttribute("message", "Ошибка сервиса платежей");
         return Mono.just("error");
     }

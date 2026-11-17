@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
 import org.isln.market.controller.request.CartActionRequest;
-import org.isln.market.model.Cart;
 import org.isln.market.service.ItemService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.reactive.result.view.Rendering;
 
@@ -21,7 +19,6 @@ public class CartController {
     public Mono<Rendering> getCart() {
         return itemService.getCart().map(
                 cart -> {
-                    System.out.println(cart.canBuy());
                     return Rendering.view("cart")
                             .modelAttribute("items", cart)
                             .modelAttribute("total", cart.getTotalPrice())

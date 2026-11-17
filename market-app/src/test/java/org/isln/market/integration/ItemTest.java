@@ -12,9 +12,11 @@ import org.isln.market.controller.request.ItemRequestParameters;
 import org.isln.market.dto.Paging;
 import org.isln.market.dto.SortType;
 import org.isln.market.model.Item;
+import org.isln.market.model.MarketUser;
 import org.isln.market.repository.ItemRepository;
 import org.isln.market.repository.OrderRepository;
 import org.isln.market.repository.OrderedItemConnectionRepository;
+import org.isln.market.repository.UserRepository;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.context.ImportTestcontainers;
-import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.reactive.result.view.Rendering;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -40,6 +41,8 @@ class ItemTest {
     @Autowired
     private OrderRepository orderRepository;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
     private OrderedItemConnectionRepository connectionRepository;
     @Autowired
     private ItemController controller;
@@ -51,6 +54,8 @@ class ItemTest {
         connectionRepository.deleteAll()
                 .then(orderRepository.deleteAll())
                 .then(itemRepository.deleteAll())
+                .then(userRepository.deleteAll())
+                .then(userRepository.save(new MarketUser().setLogin("user").setPassword("123")))
                 .block();
     }
 
