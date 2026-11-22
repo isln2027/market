@@ -10,26 +10,43 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.result.view.Rendering;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 @Controller
-@RequestMapping("/admin/balance")
+@RequestMapping("/admin")
 @RequiredArgsConstructor
 public class AdminController {
     private final AdminService adminService;
 
     @GetMapping
-    public Mono<Rendering> showBalance() {
-        return adminService.getBalance()
-                .map(balance -> Rendering.view("balance").modelAttribute("balance", balance).build());
+    public Mono<Rendering> adminPage() {
+        return adminService.getUsers()
+                .map(users -> Rendering.view("admin").modelAttribute("users", users).build());
     }
 
-    @PostMapping
+    @PostMapping("/user")
+    public Mono<Rendering> createUser(@ModelAttribute BalanceUpdateRequest request) {
+        return adminService.createUser(request.getUsername())
+                .then(Mono.just(Rendering.redirectTo("/admin").build()));
+    }
+
+    @GetMapping("/balance")
+    public Mono<Rendering> showBalance(@RequestParam String username) {
+        return adminService.getBalance(username)
+                .map(
+                        balance -> Rendering.view("balance")
+                                .modelAttribute("balance", balance)
+                                .modelAttribute("username", username)
+                                .build());
+    }
+
+    @PostMapping("/balance")
     public Mono<Rendering> updateBalance(@ModelAttribute BalanceUpdateRequest balanceUpdateRequest) {
-        return adminService.setBalance(balanceUpdateRequest.getBalance())
-                .then(Mono.just(Rendering.redirectTo("/admin/balance").build()));
+        return adminService.setBalance(balanceUpdateRequest.getBalance(), balanceUpdateRequest.getUsername())
+                .then(Mono.just(Rendering.redirectTo(getUrl(balanceUpdateRequest)).build()));
     }
 
     @ExceptionHandler(Exception.class)
@@ -41,5 +58,9 @@ public class AdminController {
                 .modelAttribute("message", message == null ? "Что то пошло не так" : message)
                 .build()
         );
+    }
+
+    private static String getUrl(BalanceUpdateRequest balanceUpdateRequest) {
+        return "/admin/balance?username=" + balanceUpdateRequest.getUsername();
     }
 }

@@ -4,11 +4,18 @@ info:
   version: 1.0.0
 paths:
   /balance:
-    get:
+    post:
       tags:
         - payment
-      summary: Получить текущий баланс
+      summary: Получить текущий баланс пользователя
       operationId: getBalance
+      requestBody:
+        description: Логин пользователя
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
       responses:
         '200':
           description: Успешный ответ
@@ -42,5 +49,15 @@ components:
       properties:
         amount:
           type: long
+        username:
+          type: string
       required:
         - amount
+        - username
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+      required:
+        - username

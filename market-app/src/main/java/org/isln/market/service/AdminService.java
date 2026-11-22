@@ -28,10 +28,14 @@ public class AdminService {
             new Item().setTitle("Ilford FP4 Plus 125").setDescription("ЧБ Фотопленка 120").setPrice(1300L).setImgPath("fp4.jpg"),
             new Item().setTitle("Harman Red 125").setDescription("Фотопленка 120").setPrice(1800L).setImgPath("red.jpg"),
 
+            new Item().setTitle("Mazda Miata").setDescription("NB2").setPrice(1_500_000L).setImgPath("mb2.png"),
             new Item().setTitle("Kodak Vision 500T Expired").setDescription("Просроченная кинопленка 135").setPrice(900L).setImgPath("500T.png"),
             new Item().setTitle("Ilford Pan 400").setDescription("Фотопленка 135").setPrice(1350L).setImgPath("pan400.jpg")
+
     );
+    private static final String ADMIN_LOGIN = "admin";
     private final ItemRepository itemRepository;
+    private final UserService userService;
 
     @EventListener
     public void populate(ApplicationStartedEvent event) {
@@ -45,5 +49,10 @@ public class AdminService {
                 })
                 .doOnError(e -> log.error("Item population failed", e))
                 .subscribe();
+    }
+
+    @EventListener
+    public void createAdminUser(ApplicationStartedEvent event) {
+        userService.createOrUpdateAdmin(ADMIN_LOGIN, "admin").subscribe();
     }
 }

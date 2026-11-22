@@ -14,5 +14,5 @@ public class OrderedItem {
     private String description;
     private String imgPath;
     private Long price;
-    private Integer count = 0;
+    private Integer itemCount = 0;
 }

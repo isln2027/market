@@ -12,7 +12,7 @@ public class ItemMapper {
         item.setTitle(orderedItem.getTitle());
         item.setDescription(orderedItem.getDescription());
         item.setPrice(orderedItem.getPrice());
-        item.setCount(orderedItem.getCount());
+        item.setCount(orderedItem.getItemCount());
         item.setImgPath(orderedItem.getImgPath());
         return item;
     }
